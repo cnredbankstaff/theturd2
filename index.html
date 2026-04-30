@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toad's Castle Adventure</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    * { font-family: 'Fredoka', sans-serif; }
+    
+    .game-canvas { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes bounce { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.85) scaleX(1.1)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes netFall { from{top:-100px;opacity:0} to{top:50%;opacity:1} }
+    @keyframes walkCycle { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+    
+    .float-anim { animation: float 2s ease-in-out infinite; }
+    .bounce-anim { animation: bounce 0.4s ease; }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .walk-anim { animation: walkCycle 0.3s ease-in-out infinite; }
+    
+    .speech-bubble {
+      position: relative; background: white; border-radius: 16px; padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 300px;
+    }
+    .speech-bubble::after {
+      content:''; position:absolute; bottom:-10px; left:30px;
+      border-width:10px 10px 0; border-style:solid; border-color:white transparent transparent;
+    }
+    
+    .heart { display:inline-block; width:24px; height:24px; position:relative; }
+    .heart::before,.heart::after {
+      content:''; position:absolute; width:12px; height:20px; background:#e53e3e;
+      border-radius:12px 12px 0 0; top:0;
+    }
+    .heart::before { left:12px; transform:rotate(-45deg); transform-origin:0 100%; }
+    .heart::after { left:0; transform:rotate(45deg); transform-origin:100% 100%; }
+    .heart.empty::before,.heart.empty::after { background:#cbd5e0; }
+    
+    .goomba {
+      position:absolute; width:32px; height:32px; transition: left 0.05s linear, bottom 0.05s linear;
+    }
+    .coin-item {
+      position:absolute; width:16px; height:16px; border-radius:50%; background:#fbbf24;
+      border:2px solid #d97706; animation: float 1.5s ease-in-out infinite;
+    }
+    
+    .toad-char { position:absolute; width:36px; height:48px; transition: none; }
+    
+    .cloud {
+      position:absolute; background:white; border-radius:50px; opacity:0.8;
+    }
+    .flower {
+      position:absolute; width:12px; height:12px; border-radius:50%;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="game-canvas" style="background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 40%, #4ade80 60%, #22c55e 100%);">
+   <!-- MAIN MENU -->
+   <div id="menu-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #60a5fa 0%, #86efac 100%);">
+    <div class="text-center">
+     <div class="mb-4">
+      <!-- Castle silhouette -->
+      <svg width="120" height="100" viewbox="0 0 120 100" class="mx-auto mb-4">
+       <rect x="20" y="40" width="80" height="60" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="10" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="90" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <polygon points="20,30 0,30 10,15 20,15" fill="#e8505b" /> <polygon points="100,30 120,30 110,15 100,15" fill="#e8505b" /> <rect x="45" y="60" width="30" height="40" fill="#8b4513" rx="15" ry="15" /> <polygon points="35,40 60,10 85,40" fill="#e8505b" /> <circle cx="60" cy="25" r="5" fill="#fbbf24" />
+      </svg>
+     </div>
+     <h1 id="title-text" class="text-4xl font-bold text-white mb-2" style="text-shadow: 2px 2px 0 #166534;">Toad's Castle Adventure</h1>
+     <p class="text-green-900 text-lg mb-8">A Super Mario inspired adventure!</p><button id="play-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all border-b-4 border-red-700"> ▶ PLAY </button>
+    </div>
+   </div><!-- GAME WORLD -->
+   <div id="game-world" class="absolute inset-0 hidden">
+    <!-- Background layers -->
+    <div id="bg-layer" class="absolute inset-0" style="background: linear-gradient(180deg, #87CEEB 0%, #b3e0f2 50%, #4ade80 65%, #16a34a 100%);">
+     <!-- Castle background -->
+     <svg id="castle-bg" class="absolute" style="bottom:35%; left:50%; transform:translateX(-50%); opacity:0.7;" width="200" height="120" viewbox="0 0 200 120">
+      <rect x="40" y="40" width="120" height="80" fill="#fce4b8" /> <rect x="20" y="25" width="30" height="95" fill="#fce4b8" /> <rect x="150" y="25" width="30" height="95" fill="#fce4b8" /> <polygon points="20,25 50,25 35,5" fill="#dc2626" /> <polygon points="150,25 180,25 165,5" fill="#dc2626" /> <polygon points="70,40 100,5 130,40" fill="#dc2626" /> <rect x="80" y="65" width="40" height="55" fill="#7c3aed" rx="20" /> <circle cx="100" cy="50" r="8" fill="#fbbf24" />
+     </svg>
+    </div><!-- Ground -->
+    <div id="ground" class="absolute bottom-0 left-0 right-0" style="height:35%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 30%, #15803d 100%);"></div><!-- Stone path -->
+    <div class="absolute bottom-0 left-0 right-0" style="height:8%;">
+     <svg width="100%" height="100%" preserveaspectratio="none">
+      <rect width="100%" height="100%" fill="#9ca3af" opacity="0.4" />
+     </svg>
+    </div><!-- Game entities container -->
+    <div id="entities" class="absolute inset-0"></div><!-- Toad player -->
+    <div id="toad" class="toad-char" style="bottom:35%; left:50%;">
+     <svg width="36" height="48" viewbox="0 0 36 48">
+      <!-- Mushroom cap --> <ellipse cx="18" cy="14" rx="16" ry="14" fill="#ffffff" /> <circle cx="10" cy="10" r="5" fill="#dc2626" /> <circle cx="24" cy="8" r="4" fill="#dc2626" /> <circle cx="18" cy="16" r="3" fill="#dc2626" /> <!-- Face --> <ellipse cx="18" cy="22" rx="10" ry="8" fill="#fce4b8" /> <circle cx="14" cy="20" r="2" fill="#1a1a1a" /> <circle cx="22" cy="20" r="2" fill="#1a1a1a" /> <ellipse cx="18" cy="24" rx="3" ry="2" fill="#fca5a5" /> <!-- Body --> <rect x="12" y="28" width="12" height="12" fill="#3b82f6" rx="2" /> <!-- Vest --> <rect x="14" y="28" width="8" height="10" fill="#eab308" rx="1" /> <!-- Legs --> <rect x="12" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <rect x="19" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <!-- Shoes --> <ellipse cx="14" cy="47" rx="4" ry="3" fill="#7c3aed" /> <ellipse cx="22" cy="47" rx="4" ry="3" fill="#7c3aed" />
+     </svg>
+    </div><!-- UI Overlay -->
+    <div id="game-ui" class="absolute top-4 left-4 right-4 flex justify-between items-start z-30 hidden">
+     <div id="hearts" class="flex gap-1"></div>
+     <div class="bg-black/40 rounded-full px-4 py-1 flex items-center gap-2">
+      <span class="text-yellow-300 text-lg">🪙</span> <span id="coin-count" class="text-white font-bold text-lg">0</span>
+     </div>
+    </div><!-- Dialogue overlay -->
+    <div id="dialogue-overlay" class="absolute inset-0 z-40 hidden flex items-end justify-center pb-20">
+     <div class="flex flex-col items-center gap-4">
+      <div id="dialogue-bubble" class="speech-bubble text-center">
+       <p id="dialogue-text" class="text-gray-800 font-semibold text-lg"></p>
+      </div>
+      <div id="dialogue-choices" class="flex gap-3 hidden"></div>
+     </div>
+    </div><!-- Mario NPC -->
+    <div id="mario" class="absolute hidden" style="bottom:35%; left:40%;">
+     <svg width="40" height="56" viewbox="0 0 40 56">
+      <rect x="10" y="0" width="20" height="12" fill="#dc2626" rx="4" /> <ellipse cx="20" cy="18" rx="10" ry="9" fill="#fce4b8" /> <circle cx="16" cy="16" r="2" fill="#1a1a1a" /> <circle cx="24" cy="16" r="2" fill="#1a1a1a" /> <rect x="14" y="22" width="12" height="4" fill="#8b4513" rx="1" /> <rect x="10" y="26" width="20" height="16" fill="#dc2626" rx="2" /> <rect x="12" y="26" width="16" height="8" fill="#3b82f6" /> <rect x="10" y="42" width="8" height="12" fill="#3b82f6" rx="2" /> <rect x="22" y="42" width="8" height="12" fill="#3b82f6" rx="2" /> <ellipse cx="14" cy="54" rx="5" ry="3" fill="#8b4513" /> <ellipse cx="26" cy="54" rx="5" ry="3" fill="#8b4513" />
+     </svg>
+    </div><!-- Bowser -->
+    <div id="bowser" class="absolute hidden" style="bottom:35%; left:50%;">
+     <svg width="60" height="70" viewbox="0 0 60 70">
+      <ellipse cx="30" cy="55" rx="22" ry="15" fill="#16a34a" /> <ellipse cx="30" cy="25" rx="18" ry="16" fill="#fbbf24" /> <circle cx="22" cy="22" r="4" fill="#dc2626" /> <circle cx="38" cy="22" r="4" fill="#dc2626" /> <rect x="20" y="32" width="20" height="6" fill="#fbbf24" /> <rect x="22" y="34" width="3" height="4" fill="white" /> <rect x="27" y="34" width="3" height="4" fill="white" /> <rect x="32" y="34" width="3" height="4" fill="white" /> <polygon points="15,10 18,20 12,20" fill="#f97316" /> <polygon points="25,5 28,18 22,18" fill="#f97316" /> <polygon points="35,5 38,18 32,18" fill="#f97316" /> <polygon points="45,10 48,20 42,20" fill="#f97316" /> <ellipse cx="30" cy="60" rx="18" ry="10" fill="#fbbf24" />
+     </svg>
+    </div><!-- Net trap effect -->
+    <div id="net-trap" class="absolute hidden z-30" style="top:-100px; left:50%; transform:translateX(-50%);">
+     <svg width="80" height="80" viewbox="0 0 80 80">
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#555" stroke-width="3" /> <line x1="0" y1="20" x2="80" y2="20" stroke="#555" stroke-width="2" /> <line x1="0" y1="40" x2="80" y2="40" stroke="#555" stroke-width="2" /> <line x1="0" y1="60" x2="80" y2="60" stroke="#555" stroke-width="2" /> <line x1="0" y1="80" x2="80" y2="80" stroke="#555" stroke-width="3" /> <line x1="0" y1="0" x2="0" y2="80" stroke="#555" stroke-width="2" /> <line x1="20" y1="0" x2="20" y2="80" stroke="#555" stroke-width="2" /> <line x1="40" y1="0" x2="40" y2="80" stroke="#555" stroke-width="2" /> <line x1="60" y1="0" x2="60" y2="80" stroke="#555" stroke-width="2" /> <line x1="80" y1="0" x2="80" y2="80" stroke="#555" stroke-width="2" />
+     </svg>
+    </div><!-- Fade overlay -->
+    <div id="fade-overlay" class="absolute inset-0 bg-black z-50 hidden" style="opacity:0; transition:opacity 1.5s;"></div>
+   </div><!-- GAME OVER -->
+   <div id="gameover-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);">
+    <h2 class="text-5xl font-bold text-red-400 mb-4" style="text-shadow: 2px 2px 0 #7f1d1d;">GAME OVER</h2>
+    <p id="gameover-msg" class="text-gray-300 text-lg mb-8">Better luck next time!</p><button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Try Again </button>
+   </div><!-- WIN SCREEN -->
+   <div id="win-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);">
+    <h2 class="text-5xl font-bold text-white mb-4" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
+    <p class="text-yellow-900 text-lg mb-8">You survived Bowser's army!</p><button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
+   </div>
+  </div>
+  <script>
+  // Config & SDK
+  const defaultConfig = {
+    game_title: "Toad's Castle Adventure",
+    background_color: "#87CEEB",
+    surface_color: "#4ade80",
+    text_color: "#ffffff",
+    primary_action_color: "#dc2626",
+    secondary_action_color: "#3b82f6",
+    font_family: "Fredoka",
+    font_size: 16
+  };
+
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const title = config.game_title || defaultConfig.game_title;
+      const el = document.getElementById('title-text');
+      if (el) el.textContent = title;
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+        { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }},
+        { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }}
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }}
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ["game_title", config.game_title || defaultConfig.game_title]
+    ])
+  });
+
+  // Game State
+  let gameState = 'menu'; // menu, intro, playing, gameover, win
+  let health = 5;
+  let coins = 0;
+  let toadX = 50; // percentage
+  let toadY = 0; // jump offset
+  let toadVY = 0;
+  let isJumping = false;
+  let facingRight = true;
+  let keys = {};
+  let goombas = [];
+  let coinItems = [];
+  let gameLoop = null;
+  let spawnTimer = null;
+  let invincible = false;
+  let goombasSpawned = 0;
+  let maxGoombas = 55;
+  let cameraX = 0;
+  let worldWidth = 2000;
+  let toadWorldX = 400;
+
+  const toad = document.getElementById('toad');
+  const mario = document.getElementById('mario');
+  const bowser = document.getElementById('bowser');
+  const entities = document.getElementById('entities');
+
+  // Menu
+  document.getElementById('play-btn').addEventListener('click', () => {
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('game-world').classList.remove('hidden');
+    startIntro();
+  });
+
+  document.getElementById('restart-btn').addEventListener('click', resetGame);
+  document.getElementById('win-restart-btn').addEventListener('click', resetGame);
+
+  function resetGame() {
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('win-screen').classList.add('hidden');
+    document.getElementById('game-world').classList.add('hidden');
+    document.getElementById('menu-screen').classList.remove('hidden');
+    document.getElementById('fade-overlay').classList.add('hidden');
+    document.getElementById('fade-overlay').style.opacity = '0';
+    health = 5; coins = 0; toadWorldX = 400; toadY = 0; toadVY = 0;
+    goombas = []; coinItems = []; goombasSpawned = 0;
+    entities.innerHTML = '';
+    mario.classList.add('hidden');
+    bowser.classList.add('hidden');
+    document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #87CEEB 0%, #b3e0f2 50%, #4ade80 65%, #16a34a 100%)';
+    document.getElementById('ground').style.background = 'linear-gradient(180deg, #4ade80 0%, #16a34a 30%, #15803d 100%)';
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    if (spawnTimer) clearInterval(spawnTimer);
+    gameState = 'menu';
+  }
+
+  // Intro sequence
+  async function startIntro() {
+    gameState = 'intro';
+    toad.style.left = '55%';
+    toad.style.bottom = '35%';
+    mario.classList.remove('hidden');
+    mario.style.left = '40%';
+    mario.style.bottom = '35%';
+
+    await delay(500);
+    await showDialogue("Oh hi, I did not see you there. I need your help! Bowser kidnapped Princess Peach in his castle. Can you help me?", [
+      { text: "Yes", action: introYes },
+      { text: "No", action: introNo }
+    ]);
+  }
+
+  async function introNo() {
+    hideDialogue();
+    // Mario sad
+    await delay(300);
+    await showDialogue("Ok…", []);
+    await delay(1500);
+    hideDialogue();
+    
+    // Mario walks away
+    mario.classList.add('walk-anim');
+    let marioLeft = 40;
+    const walkAway = setInterval(() => {
+      marioLeft -= 0.5;
+      mario.style.left = marioLeft + '%';
+      if (marioLeft < -10) {
+        clearInterval(walkAway);
+        mario.classList.add('hidden');
+        mario.classList.remove('walk-anim');
+      }
+    }, 30);
+
+    await delay(2000);
+    
+    // Net falls
+    const net = document.getElementById('net-trap');
+    net.classList.remove('hidden');
+    net.style.animation = 'netFall 0.8s ease-in forwards';
+    await delay(1000);
+
+    // Fade to black
+    const fade = document.getElementById('fade-overlay');
+    fade.classList.remove('hidden');
+    fade.style.opacity = '1';
+    await delay(2000);
+
+    // Bowser throne room scene
+    net.classList.add('hidden');
+    toad.style.left = '50%';
+    document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 50%, #4a2c2a 100%)';
+    document.getElementById('ground').style.background = '#2d1b1b';
+    
+    bowser.classList.remove('hidden');
+    bowser.style.left = '45%';
+    bowser.style.bottom = '38%';
+
+    mario.classList.remove('hidden');
+    mario.style.left = '30%';
+    mario.style.bottom = '35%';
+
+    fade.style.opacity = '0';
+    await delay(1500);
+
+    await showDialogue("You should've said yes… this is what happens when you refuse.", []);
+    await delay(3000);
+    hideDialogue();
+    await delay(500);
+
+    // Game over
+    document.getElementById('gameover-screen').classList.remove('hidden');
+    document.getElementById('gameover-msg').textContent = "Bowser got you! Should've helped Mario...";
+    gameState = 'gameover';
+  }
+
+  async function introYes() {
+    hideDialogue();
+    await delay(300);
+    
+    // Mario happy - floats up
+    mario.classList.add('float-anim');
+    await showDialogue("Okay! I'm going to the shop now, good luck!", []);
+    await delay(2000);
+    hideDialogue();
+
+    // Mario floats away
+    let marioBottom = 35;
+    const floatAway = setInterval(() => {
+      marioBottom += 1;
+      mario.style.bottom = marioBottom + '%';
+      mario.style.opacity = Math.max(0, 1 - (marioBottom - 35) / 40);
+      if (marioBottom > 75) {
+        clearInterval(floatAway);
+        mario.classList.add('hidden');
+        mario.style.opacity = '1';
+        mario.classList.remove('float-anim');
+        startGameplay();
+      }
+    }, 40);
+  }
+
+  function startGameplay() {
+    gameState = 'playing';
+    document.getElementById('game-ui').classList.remove('hidden');
+    updateHearts();
+    updateCoins();
+    spawnInitialCoins();
+    
+    // Spawn goombas gradually
+    spawnTimer = setInterval(() => {
+      if (goombasSpawned < maxGoombas && goombas.length < 15) {
+        spawnGoomba();
+        goombasSpawned++;
+      }
+    }, 2000);
+
+    gameLoop = requestAnimationFrame(update);
+  }
+
+  function spawnGoomba() {
+    const side = Math.random() > 0.5 ? toadWorldX + 500 + Math.random() * 200 : toadWorldX - 500 - Math.random() * 200;
+    const g = {
+      x: Math.max(0, Math.min(worldWidth, side)),
+      speed: 0.8 + Math.random() * 1.2,
+      dir: Math.random() > 0.5 ? 1 : -1,
+      el: null,
+      chasing: false
+    };
+    const el = document.createElement('div');
+    el.className = 'goomba';
+    el.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32">
+      <ellipse cx="16" cy="20" rx="14" ry="12" fill="#8b4513"/>
+      <ellipse cx="16" cy="14" rx="10" ry="10" fill="#d4a574"/>
+      <circle cx="11" cy="12" r="3" fill="white"/><circle cx="11" cy="13" r="2" fill="#1a1a1a"/>
+      <circle cx="21" cy="12" r="3" fill="white"/><circle cx="21" cy="13" r="2" fill="#1a1a1a"/>
+      <rect x="8" y="18" width="16" height="3" fill="#fbbf24"/>
+      <rect x="12" y="19" width="2" height="2" fill="white"/>
+      <rect x="16" y="19" width="2" height="2" fill="white"/>
+      <rect x="7" y="26" width="7" height="6" fill="#1a1a1a" rx="2"/>
+      <rect x="18" y="26" width="7" height="6" fill="#1a1a1a" rx="2"/>
+    </svg>`;
+    entities.appendChild(el);
+    g.el = el;
+    goombas.push(g);
+  }
+
+  function spawnInitialCoins() {
+    for (let i = 0; i < 20; i++) {
+      const c = {
+        x: 100 + Math.random() * (worldWidth - 200),
+        y: 10 + Math.random() * 60,
+        collected: false,
+        el: null
+      };
+      const el = document.createElement('div');
+      el.className = 'coin-item';
+      entities.appendChild(el);
+      c.el = el;
+      coinItems.push(c);
+    }
+  }
+
+  function update() {
+    if (gameState !== 'playing') return;
+
+    // Player movement
+    const speed = 4;
+    if (keys['ArrowLeft'] || keys['KeyA']) { toadWorldX -= speed; facingRight = false; }
+    if (keys['ArrowRight'] || keys['KeyD']) { toadWorldX += speed; facingRight = true; }
+    if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && !isJumping) {
+      isJumping = true; toadVY = -12;
+    }
+
+    // Gravity
+    if (isJumping) {
+      toadY += toadVY;
+      toadVY += 0.6;
+      if (toadY >= 0) { toadY = 0; isJumping = false; toadVY = 0; }
+    }
+
+    // Clamp position
+    toadWorldX = Math.max(20, Math.min(worldWidth - 20, toadWorldX));
+
+    // Camera
+    const containerW = document.getElementById('game-world').offsetWidth;
+    cameraX = toadWorldX - containerW / 2;
+    cameraX = Math.max(0, Math.min(worldWidth - containerW, cameraX));
+
+    // Update toad position
+    const screenX = toadWorldX - cameraX;
+    toad.style.left = screenX + 'px';
+    toad.style.bottom = (35 + (-toadY * 0.3)) + '%';
+    toad.style.transform = facingRight ? 'scaleX(1)' : 'scaleX(-1)';
+    if ((keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD']) && !isJumping) {
+      toad.classList.add('walk-anim');
+    } else {
+      toad.classList.remove('walk-anim');
+    }
+
+    // Update goombas
+    goombas.forEach(g => {
+      const dist = Math.abs(g.x - toadWorldX);
+      if (dist < 200) {
+        g.chasing = true;
+        g.dir = g.x < toadWorldX ? 1 : -1;
+      } else {
+        g.chasing = false;
+      }
+      g.x += g.speed * g.dir * (g.chasing ? 1.5 : 1);
+      if (g.x < 0 || g.x > worldWidth) g.dir *= -1;
+
+      const gScreenX = g.x - cameraX;
+      g.el.style.left = gScreenX + 'px';
+      g.el.style.bottom = '33%';
+      g.el.style.transform = g.dir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+      g.el.style.display = (gScreenX > -50 && gScreenX < containerW + 50) ? 'block' : 'none';
+
+      // Collision
+      if (!invincible && dist < 25 && Math.abs(toadY) < 10) {
+        takeDamage();
+      }
+    });
+
+    // Update coins
+    coinItems.forEach(c => {
+      if (c.collected) return;
+      const cScreenX = c.x - cameraX;
+      c.el.style.left = cScreenX + 'px';
+      c.el.style.bottom = (35 + c.y * 0.1) + '%';
+      c.el.style.display = (cScreenX > -20 && cScreenX < containerW + 20) ? 'block' : 'none';
+
+      if (Math.abs(c.x - toadWorldX) < 20 && Math.abs(toadY) < 30) {
+        c.collected = true;
+        c.el.style.display = 'none';
+        coins++;
+        updateCoins();
+      }
+    });
+
+    // Win condition: survived all goombas and collected enough coins
+    if (goombasSpawned >= maxGoombas && goombas.length === 0) {
+      gameState = 'win';
+      document.getElementById('win-screen').classList.remove('hidden');
+      if (spawnTimer) clearInterval(spawnTimer);
+      return;
+    }
+
+    // Remove off-screen goombas that went too far
+    goombas = goombas.filter(g => {
+      if (g.x < -100 || g.x > worldWidth + 100) {
+        g.el.remove();
+        return false;
+      }
+      return true;
+    });
+
+    gameLoop = requestAnimationFrame(update);
+  }
+
+  function takeDamage() {
+    health--;
+    invincible = true;
+    toad.style.opacity = '0.5';
+    updateHearts();
+    
+    if (health <= 0) {
+      gameState = 'gameover';
+      if (spawnTimer) clearInterval(spawnTimer);
+      document.getElementById('gameover-screen').classList.remove('hidden');
+      document.getElementById('gameover-msg').textContent = "The Goombas got you!";
+      return;
+    }
+
+    setTimeout(() => { invincible = false; toad.style.opacity = '1'; }, 1500);
+  }
+
+  function updateHearts() {
+    const container = document.getElementById('hearts');
+    container.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const h = document.createElement('span');
+      h.className = 'heart' + (i >= health ? ' empty' : '');
+      container.appendChild(h);
+    }
+  }
+
+  function updateCoins() {
+    document.getElementById('coin-count').textContent = coins;
+  }
+
+  // Dialogue system
+  function showDialogue(text, choices) {
+    return new Promise(resolve => {
+      const overlay = document.getElementById('dialogue-overlay');
+      const textEl = document.getElementById('dialogue-text');
+      const choicesEl = document.getElementById('dialogue-choices');
+      
+      overlay.classList.remove('hidden');
+      textEl.textContent = text;
+      
+      if (choices && choices.length > 0) {
+        choicesEl.classList.remove('hidden');
+        choicesEl.innerHTML = '';
+        choices.forEach(c => {
+          const btn = document.createElement('button');
+          btn.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-full shadow transition-all transform hover:scale-105';
+          btn.textContent = c.text;
+          btn.addEventListener('click', () => { c.action(); resolve(); });
+          choicesEl.appendChild(btn);
+        });
+      } else {
+        choicesEl.classList.add('hidden');
+        resolve();
+      }
+    });
+  }
+
+  function hideDialogue() {
+    document.getElementById('dialogue-overlay').classList.add('hidden');
+    document.getElementById('dialogue-choices').classList.add('hidden');
+  }
+
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Controls
+  document.addEventListener('keydown', e => { keys[e.code] = true; });
+  document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+  // Touch controls
+  let touchStartX = 0;
+  let touchActive = false;
+  document.addEventListener('touchstart', e => {
+    touchActive = true;
+    touchStartX = e.touches[0].clientX;
+    const screenW = window.innerWidth;
+    if (e.touches[0].clientY < window.innerHeight * 0.5) {
+      keys['Space'] = true;
+      setTimeout(() => { keys['Space'] = false; }, 100);
+    }
+  });
+  document.addEventListener('touchmove', e => {
+    if (!touchActive) return;
+    const x = e.touches[0].clientX;
+    const screenW = window.innerWidth;
+    if (x < screenW * 0.4) { keys['ArrowLeft'] = true; keys['ArrowRight'] = false; }
+    else if (x > screenW * 0.6) { keys['ArrowRight'] = true; keys['ArrowLeft'] = false; }
+    else { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; }
+  });
+  document.addEventListener('touchend', () => {
+    touchActive = false;
+    keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
+  });
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f49c118452e8ccc',t:'MTc3NzU4NTc0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
