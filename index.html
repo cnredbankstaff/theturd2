@@ -2,14 +2,17 @@
 <html lang="en" class="h-full">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Toad's Castle Adventure</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
-    html, body { height: 100%; margin: 0; overflow: hidden; }
-    * { font-family: 'Fredoka', sans-serif; }
+    html, body { height: 100%; margin: 0; overflow: hidden; touch-action: none; }
+    * { font-family: 'Fredoka', sans-serif; -webkit-user-select: none; user-select: none; }
+    @media (max-width: 768px) {
+      body { font-size: 14px; }
+    }
     
     .game-canvas { position: relative; width: 100%; height: 100%; overflow: hidden; }
     
@@ -55,11 +58,80 @@
     
     .confetti { position: absolute; width: 10px; height: 10px; animation: confettiFall 3s ease-in forwards; }
     
-    .cloud {
-      position:absolute; background:white; border-radius:50px; opacity:0.8;
+    #confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+    
+    /* Mobile controls */
+    #mobile-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 20px;
+      z-index: 25;
+      pointer-events: auto;
+      gap: 10px;
     }
-    .flower {
-      position:absolute; width:12px; height:12px; border-radius:50%;
+    
+    .mobile-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 3px solid white;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: background 0.1s;
+      flex: 1;
+      max-width: 70px;
+    }
+    
+    .mobile-btn:active {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(0.95);
+    }
+    
+    .mobile-btn-center {
+      width: 80px;
+      height: 80px;
+      font-size: 32px;
+      max-width: 90px;
+      flex: 1.2;
+    }
+    
+    @media (min-width: 769px) {
+      #mobile-controls { display: none; }
+    }
+
+    @media (max-height: 600px) {
+      #mobile-controls {
+        bottom: 10px;
+        padding: 0 10px;
+        gap: 5px;
+      }
+      
+      .mobile-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        max-width: 60px;
+      }
+      
+      .mobile-btn-center {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+        max-width: 80px;
+      }
     }
   </style>
   <style>body { box-sizing: border-box; }</style>
@@ -69,13 +141,13 @@
  <body class="h-full">
   <div id="app" class="game-canvas" style="background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 40%, #4ade80 60%, #22c55e 100%);"><!-- MAIN MENU -->
    <div id="menu-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #60a5fa 0%, #86efac 100%);">
-    <div class="text-center">
+    <div class="text-center px-4">
      <div class="mb-4"><!-- Castle silhouette -->
       <svg width="120" height="100" viewbox="0 0 120 100" class="mx-auto mb-4"><rect x="20" y="40" width="80" height="60" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="10" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="90" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <polygon points="20,30 0,30 10,15 20,15" fill="#e8505b" /> <polygon points="100,30 120,30 110,15 100,15" fill="#e8505b" /> <rect x="45" y="60" width="30" height="40" fill="#8b4513" rx="15" ry="15" /> <polygon points="35,40 60,10 85,40" fill="#e8505b" /> <circle cx="60" cy="25" r="5" fill="#fbbf24" />
       </svg>
      </div>
-     <h1 id="title-text" class="text-4xl font-bold text-white mb-2" style="text-shadow: 2px 2px 0 #166534;">Toad's Castle Adventure</h1>
-     <p class="text-green-900 text-lg mb-8">A Super Mario inspired adventure!</p><button id="play-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all border-b-4 border-red-700"> ▶ PLAY </button>
+     <h1 id="title-text" class="text-3xl sm:text-4xl font-bold text-white mb-2" style="text-shadow: 2px 2px 0 #166534;">Toad's Castle Adventure</h1>
+     <p class="text-green-900 text-base sm:text-lg mb-8">A Super Mario inspired adventure!</p><button id="play-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xl sm:text-2xl px-8 sm:px-12 py-3 sm:py-4 rounded-full shadow-lg transform hover:scale-105 transition-all border-b-4 border-red-700"> ▶ PLAY </button>
     </div>
    </div><!-- GAME WORLD -->
    <div id="game-world" class="absolute inset-0 hidden"><!-- Background layers -->
@@ -93,19 +165,19 @@
      <svg width="36" height="48" viewbox="0 0 36 48"><!-- Mushroom cap --> <ellipse cx="18" cy="14" rx="16" ry="14" fill="#ffffff" /> <circle cx="10" cy="10" r="5" fill="#dc2626" /> <circle cx="24" cy="8" r="4" fill="#dc2626" /> <circle cx="18" cy="16" r="3" fill="#dc2626" /> <!-- Face --> <ellipse cx="18" cy="22" rx="10" ry="8" fill="#fce4b8" /> <circle cx="14" cy="20" r="2" fill="#1a1a1a" /> <circle cx="22" cy="20" r="2" fill="#1a1a1a" /> <ellipse cx="18" cy="24" rx="3" ry="2" fill="#fca5a5" /> <!-- Body --> <rect x="12" y="28" width="12" height="12" fill="#3b82f6" rx="2" /> <!-- Vest --> <rect x="14" y="28" width="8" height="10" fill="#eab308" rx="1" /> <!-- Legs --> <rect x="12" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <rect x="19" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <!-- Shoes --> <ellipse cx="14" cy="47" rx="4" ry="3" fill="#7c3aed" /> <ellipse cx="22" cy="47" rx="4" ry="3" fill="#7c3aed" />
      </svg>
     </div><!-- UI Overlay -->
-    <div id="game-ui" class="absolute top-4 left-4 right-4 flex justify-between items-start z-30 hidden">
+    <div id="game-ui" class="absolute top-4 left-4 right-4 flex justify-between items-start z-30 hidden px-2">
      <div id="hearts" class="flex gap-1"></div>
-     <div class="bg-black/40 rounded-full px-4 py-1 flex items-center gap-2"><span class="text-yellow-300 text-lg">🪙</span> <span id="coin-count" class="text-white font-bold text-lg">0</span>
+     <div class="bg-black/40 rounded-full px-3 py-1 flex items-center gap-2 text-sm sm:text-base"><span class="text-yellow-300 text-lg">🪙</span> <span id="coin-count" class="text-white font-bold">0</span>
      </div>
-     <div id="boss-battle-ui" class="bg-black/40 rounded-full px-4 py-1 flex items-center gap-2 hidden"><span class="text-red-300 text-lg">👹</span> <span id="boss-hit-counter" class="text-white font-bold text-lg">0</span>
+     <div id="boss-battle-ui" class="bg-black/40 rounded-full px-3 py-1 flex items-center gap-2 hidden text-sm sm:text-base"><span class="text-red-300 text-lg">👹</span> <span id="boss-hit-counter" class="text-white font-bold">0</span>
      </div>
     </div><!-- Dialogue overlay -->
-    <div id="dialogue-overlay" class="absolute inset-0 z-40 hidden flex items-end justify-center pb-20">
+    <div id="dialogue-overlay" class="absolute inset-0 z-40 hidden flex items-end justify-center pb-20 px-4">
      <div class="flex flex-col items-center gap-4">
-      <div id="dialogue-bubble" class="speech-bubble text-center">
-       <p id="dialogue-text" class="text-gray-800 font-semibold text-lg"></p>
+      <div id="dialogue-bubble" class="speech-bubble text-center text-sm sm:text-base">
+       <p id="dialogue-text" class="text-gray-800 font-semibold"></p>
       </div>
-      <div id="dialogue-choices" class="flex gap-3 hidden"></div>
+      <div id="dialogue-choices" class="flex gap-3 hidden flex-wrap justify-center"></div>
      </div>
     </div><!-- Mario NPC -->
     <div id="mario" class="absolute hidden" style="bottom:35%; left:40%;">
@@ -115,20 +187,35 @@
     <div id="bowser" class="absolute hidden" style="bottom:35%; left:50%;">
      <svg width="60" height="70" viewbox="0 0 60 70"><ellipse cx="30" cy="55" rx="22" ry="15" fill="#16a34a" /> <ellipse cx="30" cy="25" rx="18" ry="16" fill="#fbbf24" /> <circle cx="22" cy="22" r="4" fill="#dc2626" /> <circle cx="38" cy="22" r="4" fill="#dc2626" /> <rect x="20" y="32" width="20" height="6" fill="#fbbf24" /> <rect x="22" y="34" width="3" height="4" fill="white" /> <rect x="27" y="34" width="3" height="4" fill="white" /> <rect x="32" y="34" width="3" height="4" fill="white" /> <polygon points="15,10 18,20 12,20" fill="#f97316" /> <polygon points="25,5 28,18 22,18" fill="#f97316" /> <polygon points="35,5 38,18 32,18" fill="#f97316" /> <polygon points="45,10 48,20 42,20" fill="#f97316" /> <ellipse cx="30" cy="60" rx="18" ry="10" fill="#fbbf24" />
      </svg>
-    </div><!-- Net trap effect -->
-    <div id="net-trap" class="absolute hidden z-30" style="top:-100px; left:50%; transform:translateX(-50%);">
-     <svg width="80" height="80" viewbox="0 0 80 80"><line x1="0" y1="0" x2="80" y2="0" stroke="#555" stroke-width="3" /> <line x1="0" y1="20" x2="80" y2="20" stroke="#555" stroke-width="2" /> <line x1="0" y1="40" x2="80" y2="40" stroke="#555" stroke-width="2" /> <line x1="0" y1="60" x2="80" y2="60" stroke="#555" stroke-width="2" /> <line x1="0" y1="80" x2="80" y2="80" stroke="#555" stroke-width="3" /> <line x1="0" y1="0" x2="0" y2="80" stroke="#555" stroke-width="2" /> <line x1="20" y1="0" x2="20" y2="80" stroke="#555" stroke-width="2" /> <line x1="40" y1="0" x2="40" y2="80" stroke="#555" stroke-width="2" /> <line x1="60" y1="0" x2="60" y2="80" stroke="#555" stroke-width="2" /> <line x1="80" y1="0" x2="80" y2="80" stroke="#555" stroke-width="2" />
+    </div><!-- MEGA FUSION BOSS: DNA-COMBINED MARIO & BOWSER -->
+    <div id="mega-boss" class="absolute hidden" style="bottom:33%; left:50%;">
+     <svg width="95" height="105" viewbox="0 0 95 105">
+      <defs>
+       <radialgradient id="megaBossAura">
+        <stop offset="0%" style="stop-color:#ffff00;stop-opacity:0.6" />
+        <stop offset="70%" style="stop-color:#ff6600;stop-opacity:0.3" />
+        <stop offset="100%" style="stop-color:#ff0000;stop-opacity:0" />
+       </radialgradient>
+      </defs> <!-- Aura glow --> <circle cx="47.5" cy="52" r="52" fill="url(#megaBossAura)" opacity="0.7" /> <!-- DNA HELIX STRANDS --> <path d="M 28 12 Q 38 24 33 40 Q 28 55 38 75" stroke="#00ff00" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85" /> <path d="M 67 12 Q 57 24 62 40 Q 67 55 57 75" stroke="#00ff00" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85" /> <!-- DNA connectors --> <circle cx="30" cy="28" r="3.5" fill="#00ff00" opacity="1" /> <circle cx="65" cy="28" r="3.5" fill="#00ff00" opacity="1" /> <line x1="30" y1="28" x2="65" y2="28" stroke="#00ff00" stroke-width="3" opacity="0.7" /> <circle cx="35" cy="52" r="3.5" fill="#00ff00" opacity="1" /> <circle cx="60" cy="52" r="3.5" fill="#00ff00" opacity="1" /> <line x1="35" y1="52" x2="60" y2="52" stroke="#00ff00" stroke-width="3" opacity="0.7" /> <!-- HEAD: RED CAP + GOLDEN SPIKES --> <rect x="18" y="2" width="59" height="26" fill="#dc2626" rx="10" /> <polygon points="26,2 23,-12 29,2" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="42,0 38,-14 46,0" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="58,2 55,-12 61,2" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="71,0 68,-14 74,0" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <!-- HYBRID FACE --> <ellipse cx="47.5" cy="42" rx="27" ry="22" fill="#fce4b8" stroke="#f97316" stroke-width="3" /> <!-- LEFT EYE: Mario style --> <circle cx="32" cy="36" r="5" fill="white" stroke="#1a1a1a" stroke-width="2" /> <circle cx="32" cy="36" r="2.5" fill="#1a1a1a" /> <!-- RIGHT EYE: Bowser menacing --> <circle cx="63" cy="32" r="7" fill="white" stroke="#1a1a1a" stroke-width="2" /> <circle cx="63" cy="32" r="4" fill="#dc2626" /> <circle cx="65" cy="30" r="2" fill="white" /> <!-- SHARP FANGS --> <polygon points="36,48 32,58 40,52" fill="white" stroke="#333" stroke-width="1" /> <polygon points="59,48 63,58 55,52" fill="white" stroke="#333" stroke-width="1" /> <!-- EVIL GRIN --> <path d="M 38 52 Q 47.5 57 57 52" stroke="#8b4513" stroke-width="3" fill="none" stroke-linecap="round" /> <!-- BODY: RED TORSO WITH BOWSER'S SHELL --> <rect x="16" y="60" width="63" height="32" fill="#dc2626" rx="5" /> <ellipse cx="47.5" cy="70" rx="30" ry="16" fill="#16a34a" opacity="0.88" /> <!-- SHELL SPIKES --> <polygon points="25,60 21,48 29,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="47.5,60 43,46 52,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="70,60 74,48 66,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <!-- OVERALLS PANEL --> <rect x="22" y="62" width="51" height="20" fill="#3b82f6" opacity="0.95" rx="2" /> <circle cx="32" cy="71" r="3" fill="#fbbf24" /> <circle cx="63" cy="71" r="3" fill="#fbbf24" /> <!-- LEFT CLAWS --> <rect x="12" y="85" width="12" height="18" fill="#16a34a" rx="5" /> <polygon points="12,103 8,103 8,105" fill="#1a1a1a" /> <polygon points="18,103 22,103 22,105" fill="#1a1a1a" /> <polygon points="24,103 28,103 28,105" fill="#1a1a1a" /> <!-- RIGHT CLAWS --> <rect x="71" y="85" width="12" height="18" fill="#16a34a" rx="5" /> <polygon points="71,103 67,103 67,105" fill="#1a1a1a" /> <polygon points="77,103 81,103 81,105" fill="#1a1a1a" /> <polygon points="83,103 87,103 87,105" fill="#1a1a1a" />
+     </svg>
+    </div><!-- Princess Peach -->
+    <div id="princess-peach" class="absolute hidden" style="bottom:35%; left:60%;">
+     <svg width="44" height="60" viewbox="0 0 44 60">
+      <polygon points="8,5 22,0 36,5 32,12 12,12" fill="#fbbf24" stroke="#d97706" stroke-width="1" /> <circle cx="16" cy="8" r="2" fill="#ec4899" /> <circle cx="22" cy="5" r="2" fill="#ec4899" /> <circle cx="28" cy="8" r="2" fill="#ec4899" /> <ellipse cx="22" cy="20" rx="11" ry="10" fill="#fce4b8" /> <circle cx="17" cy="18" r="2.5" fill="#1a1a1a" /> <circle cx="27" cy="18" r="2.5" fill="#1a1a1a" /> <ellipse cx="22" cy="23" rx="2" ry="1.5" fill="#ec4899" /> <path d="M 11 18 Q 8 12 11 8" stroke="#fbbf24" stroke-width="3" fill="none" /> <path d="M 33 18 Q 36 12 33 8" stroke="#fbbf24" stroke-width="3" fill="none" /> <polygon points="15,28 29,28 34,60 10,60" fill="#ec4899" /> <ellipse cx="22" cy="28" rx="15" ry="4" fill="#fbbf24" opacity="0.6" /> <rect x="8" y="30" width="6" height="18" fill="#fce4b8" rx="2" /> <rect x="30" y="30" width="6" height="18" fill="#fce4b8" rx="2" /> <ellipse cx="16" cy="58" rx="5" ry="3" fill="#fbbf24" /> <ellipse cx="28" cy="58" rx="5" ry="3" fill="#fbbf24" />
      </svg>
     </div><!-- Fade overlay -->
-    <div id="fade-overlay" class="absolute inset-0 bg-black z-50 hidden" style="opacity:0; transition:opacity 1.5s;"></div>
+    <div id="fade-overlay" class="absolute inset-0 bg-black z-50 hidden" style="opacity:0; transition:opacity 1.5s;"></div><!-- Confetti container -->
+    <div id="confetti-container"></div><!-- Mobile Controls (only visible on small screens) -->
+    <div id="mobile-controls"><button class="mobile-btn" id="mobile-left">◀</button> <button class="mobile-btn mobile-btn-center" id="mobile-jump">🎬</button> <button class="mobile-btn" id="mobile-right">▶</button>
+    </div>
    </div><!-- GAME OVER -->
-   <div id="gameover-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);">
-    <h2 class="text-5xl font-bold text-red-400 mb-4" style="text-shadow: 2px 2px 0 #7f1d1d;">GAME OVER</h2>
-    <p id="gameover-msg" class="text-gray-300 text-lg mb-8">Better luck next time!</p><button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Try Again </button>
+   <div id="gameover-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50 px-4" style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);">
+    <h2 class="text-3xl sm:text-5xl font-bold text-red-400 mb-4" style="text-shadow: 2px 2px 0 #7f1d1d;">GAME OVER</h2>
+    <p id="gameover-msg" class="text-gray-300 text-base sm:text-lg mb-8 text-center">Better luck next time!</p><button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-lg sm:text-xl px-8 sm:px-10 py-2 sm:py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Try Again </button>
    </div><!-- WIN SCREEN -->
-   <div id="win-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);">
-    <h2 class="text-5xl font-bold text-white mb-4" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
-    <p class="text-yellow-900 text-lg mb-8">You survived Bowser's army!</p><button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
+   <div id="win-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50 px-4" style="background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);">
+    <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4 text-center" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
+    <p class="text-yellow-900 text-base sm:text-lg mb-8 text-center">You survived the ultimate fusion!</p><button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-lg sm:text-xl px-8 sm:px-10 py-2 sm:py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
    </div>
   </div>
   <script>
@@ -169,11 +256,11 @@
   });
 
   // Game State
-  let gameState = 'menu'; // menu, intro, playing, gameover, win
+  let gameState = 'menu';
   let health = 5;
   let coins = 0;
-  let toadX = 50; // percentage
-  let toadY = 0; // jump offset
+  let toadX = 50;
+  let toadY = 0;
   let toadVY = 0;
   let isJumping = false;
   let facingRight = true;
@@ -193,10 +280,15 @@
   let bowserX = 400;
   let bowserHits = 0;
   let goombasDefeated = 0;
+  let megaBossActive = false;
+  let megaBossX = 400;
+  let megaBossHits = 0;
 
   const toad = document.getElementById('toad');
   const mario = document.getElementById('mario');
   const bowser = document.getElementById('bowser');
+  const megaBoss = document.getElementById('mega-boss');
+  const princess = document.getElementById('princess-peach');
   const entities = document.getElementById('entities');
 
   // Audio context for sound effects
@@ -227,7 +319,6 @@
     osc.connect(gain);
     gain.connect(audioContext.destination);
     
-    // Ka-ching: two tones - low then high
     osc.frequency.setValueAtTime(600, now);
     osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
     gain.gain.setValueAtTime(0.4, now);
@@ -235,6 +326,58 @@
     
     osc.start(now);
     osc.stop(now + 0.15);
+  }
+
+  let bossMusicOscillators = [];
+
+  function playBossMusic() {
+    stopBossMusic();
+    
+    const pattern = [
+      { freq: 130.81, dur: 0.3 },
+      { freq: 164.81, dur: 0.3 },
+      { freq: 196.00, dur: 0.3 },
+      { freq: 246.94, dur: 0.3 },
+      { freq: 196.00, dur: 0.3 },
+      { freq: 164.81, dur: 0.3 },
+    ];
+    
+    function playPattern(startTime = audioContext.currentTime) {
+      if (bossMusicOscillators.length === 0) return;
+      
+      let currentTime = startTime;
+      pattern.forEach(note => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.frequency.value = note.freq;
+        gain.gain.setValueAtTime(0.15, currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + note.dur * 0.9);
+        
+        osc.start(currentTime);
+        osc.stop(currentTime + note.dur);
+        
+        bossMusicOscillators.push(osc);
+        currentTime += note.dur;
+      });
+      
+      setTimeout(() => playPattern(audioContext.currentTime), (pattern.reduce((a, b) => a + b.dur, 0) - 0.05) * 1000);
+    }
+    
+    bossMusicOscillators.push(true);
+    playPattern();
+  }
+
+  function stopBossMusic() {
+    bossMusicOscillators.forEach(osc => {
+      if (osc && osc.stop) {
+        try { osc.stop(); } catch (e) {}
+      }
+    });
+    bossMusicOscillators = [];
   }
 
   // Menu
@@ -263,7 +406,9 @@
     isJumping = false;
     invincible = false;
     bossActive = false;
+    megaBossActive = false;
     bowserHits = 0;
+    megaBossHits = 0;
     goombasSpawned = 0;
     goombasDefeated = 0;
     goombas = [];
@@ -271,6 +416,8 @@
     entities.innerHTML = '';
     mario.classList.add('hidden');
     bowser.classList.add('hidden');
+    megaBoss.classList.add('hidden');
+    princess.classList.add('hidden');
     document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #87CEEB 0%, #b3e0f2 50%, #4ade80 65%, #16a34a 100%)';
     document.getElementById('ground').style.background = 'linear-gradient(180deg, #4ade80 0%, #16a34a 30%, #15803d 100%)';
     toad.style.opacity = '1';
@@ -278,6 +425,7 @@
     toad.style.bottom = '35%';
     if (gameLoop) cancelAnimationFrame(gameLoop);
     if (spawnTimer) clearInterval(spawnTimer);
+    document.getElementById('confetti-container').innerHTML = '';
     gameState = 'menu';
   }
 
@@ -299,78 +447,94 @@
 
   async function introNo() {
     hideDialogue();
-    // Mario sad
     await delay(300);
-    await showDialogue("Ok…", []);
-    await delay(1500);
-    hideDialogue();
-    
-    // Mario walks away
-    mario.classList.add('walk-anim');
-    let marioLeft = 40;
-    const walkAway = setInterval(() => {
-      marioLeft -= 0.5;
-      mario.style.left = marioLeft + '%';
-      if (marioLeft < -10) {
-        clearInterval(walkAway);
-        mario.classList.add('hidden');
-        mario.classList.remove('walk-anim');
-      }
-    }, 30);
-
+    await showDialogue("You should've said yes… let me combine my power with Bowser!", []);
     await delay(2000);
-    
-    // Net falls
-    const net = document.getElementById('net-trap');
-    net.classList.remove('hidden');
-    net.style.animation = 'netFall 0.8s ease-in forwards';
-    await delay(1000);
+    hideDialogue();
 
-    // Fade to black
     const fade = document.getElementById('fade-overlay');
     fade.classList.remove('hidden');
     fade.style.opacity = '1';
-    await delay(2000);
+    await delay(1500);
 
-    // Bowser throne room scene
-    net.classList.add('hidden');
-    toad.style.left = '50%';
     document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 50%, #4a2c2a 100%)';
     document.getElementById('ground').style.background = '#2d1b1b';
     
     bowser.classList.remove('hidden');
-    bowser.style.left = '45%';
+    bowser.style.left = '55%';
     bowser.style.bottom = '38%';
 
     mario.classList.remove('hidden');
-    mario.style.left = '30%';
+    mario.style.left = '35%';
     mario.style.bottom = '35%';
 
     fade.style.opacity = '0';
     await delay(1500);
 
-    await showDialogue("You should've said yes… this is what happens when you refuse.", []);
-    await delay(3000);
+    await showDialogue("Bowser! Merge with me! We'll crush this toad together!", []);
+    await delay(2500);
     hideDialogue();
     await delay(500);
 
-    // Game over
-    document.getElementById('gameover-screen').classList.remove('hidden');
-    document.getElementById('gameover-msg').textContent = "Bowser got you! Should've helped Mario...";
-    gameState = 'gameover';
+    const fusionFlash = document.createElement('div');
+    fusionFlash.style.cssText = 'position:absolute; inset:0; background:radial-gradient(circle, #ffff00 0%, #ff6600 50%, transparent 70%); z-index:45;';
+    document.getElementById('game-world').appendChild(fusionFlash);
+    
+    for (let i = 0; i < 4; i++) {
+      await delay(250);
+      fusionFlash.style.opacity = i % 2 === 0 ? '1' : '0';
+    }
+    fusionFlash.remove();
+
+    mario.classList.add('hidden');
+    bowser.classList.add('hidden');
+
+    megaBoss.classList.remove('hidden');
+    megaBoss.style.left = '50%';
+    megaBoss.style.bottom = '33%';
+
+    await delay(800);
+    await showDialogue("BEHOLD THE ULTIMATE FUSION! MARIO + BOWSER DNA COMBINED! ⚡🧬", []);
+    await delay(3000);
+    hideDialogue();
+
+    health = 5;
+    megaBossActive = true;
+    megaBossX = 400;
+    megaBossHits = 0;
+    gameState = 'playing';
+    document.getElementById('game-ui').classList.remove('hidden');
+    updateHearts();
+    updateCoins();
+    
+    fade.style.opacity = '1';
+    await delay(800);
+    fade.classList.add('hidden');
+    fade.style.opacity = '0';
+    
+    playBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.remove('hidden');
+    
+    megaBoss.style.animation = 'bounce 0.4s ease-in-out';
+    
+    await showDialogue("Jump on the fusion 30 times to split them apart!", []);
+    await delay(2500);
+    hideDialogue();
+    
+    gameLoop = requestAnimationFrame(update);
   }
 
   async function introYes() {
     hideDialogue();
     await delay(300);
     
-    // Mario happy - floats up
     mario.classList.add('float-anim');
     await showDialogue("Okay! I'm going to the shop now, good luck!", []);
     await delay(2000);
     hideDialogue();
 
-    // Mario floats away
     let marioBottom = 35;
     const floatAway = setInterval(() => {
       marioBottom += 1;
@@ -393,7 +557,6 @@
     updateCoins();
     spawnInitialCoins();
     
-    // Spawn goombas gradually
     spawnTimer = setInterval(() => {
       if (goombasSpawned < maxGoombas && goombas.length < 15) {
         spawnGoomba();
@@ -450,30 +613,25 @@
   function update() {
     if (gameState !== 'playing') return;
 
-    // Player movement
     const speed = 4;
     if (keys['ArrowLeft'] || keys['KeyA']) { toadWorldX -= speed; facingRight = false; }
     if (keys['ArrowRight'] || keys['KeyD']) { toadWorldX += speed; facingRight = true; }
     if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && !isJumping) {
-      isJumping = true; toadVY = -12;
+      isJumping = true; toadVY = -12; playJumpSound();
     }
 
-    // Gravity
     if (isJumping) {
       toadY += toadVY;
       toadVY += 0.6;
       if (toadY >= 0) { toadY = 0; isJumping = false; toadVY = 0; }
     }
 
-    // Clamp position
     toadWorldX = Math.max(20, Math.min(worldWidth - 20, toadWorldX));
 
-    // Camera
     const containerW = document.getElementById('game-world').offsetWidth;
     cameraX = toadWorldX - containerW / 2;
     cameraX = Math.max(0, Math.min(worldWidth - containerW, cameraX));
 
-    // Update toad position
     const screenX = toadWorldX - cameraX;
     toad.style.left = screenX + 'px';
     toad.style.bottom = (35 + (-toadY * 0.3)) + '%';
@@ -484,30 +642,25 @@
       toad.classList.remove('walk-anim');
     }
 
-    // Update goombas
     goombas = goombas.filter(g => {
       const dist = Math.abs(g.x - toadWorldX);
       
-      // Jump on goomba - defeat it
       if (dist < 25 && toadY < -5 && toadVY > 0) {
-        // Goomba dies
         g.el.remove();
-        toadVY = -8; // Bounce up
+        toadVY = -8;
         coins += 10;
         updateCoins();
-        playJumpSound(); // Play sound when defeating goomba
+        playJumpSound();
         
-        goombasDefeated++; // Track defeated goombas
+        goombasDefeated++;
         
-        // Trigger boss AFTER 8 defeats
         if (!bossActive && goombasDefeated >= 8) {
           startBossBattle();
         }
         
-        return false; // Remove from array
+        return false;
       }
       
-      // Normal collision - take damage
       if (!invincible && dist < 25 && Math.abs(toadY) < 10) {
         takeDamage();
       }
@@ -527,10 +680,9 @@
       g.el.style.transform = g.dir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
       g.el.style.display = (gScreenX > -50 && gScreenX < containerW + 50) ? 'block' : 'none';
       
-      return true; // Keep in array
+      return true;
     });
 
-    // Update coins
     coinItems.forEach(c => {
       if (c.collected) return;
       const cScreenX = c.x - cameraX;
@@ -547,7 +699,6 @@
       }
     });
 
-    // Win condition: survived all goombas and collected enough coins
     if (goombasSpawned >= maxGoombas && goombas.length === 0) {
       gameState = 'win';
       document.getElementById('win-screen').classList.remove('hidden');
@@ -555,42 +706,75 @@
       return;
     }
 
-    // Update boss battle if active
     if (bossActive) {
       const bossScreenX = bowserX - cameraX;
       bowser.style.left = bossScreenX + 'px';
       
-      // Jump on Bowser - hit him
       if (Math.abs(bowserX - toadWorldX) < 30 && toadY < -5 && toadVY > 0) {
         bowserHits++;
-        toadVY = -10; // Bounce higher
+        toadVY = -10;
         const counter = document.getElementById('boss-hit-counter');
         if (counter) counter.textContent = bowserHits;
         
-        // Bowser defeated
+        const hitSpeedMultiplier = 1 + (bowserHits * 0.15);
+        bowser.style.animation = `bounce ${Math.max(0.3, 0.6 / hitSpeedMultiplier)}s ease-in-out`;
+        
         if (bowserHits >= 20) {
           endBossBattle();
           return;
         }
       }
       
-      // Move Bowser toward Toad
       const distToBowser = bowserX - toadWorldX;
+      const bowserSpeed = 2 + (bowserHits * 0.3);
       if (distToBowser > 100) {
-        bowserX -= 2;
+        bowserX -= bowserSpeed;
       } else if (distToBowser < -100) {
-        bowserX += 2;
+        bowserX += bowserSpeed;
       } else {
-        bowserX += (Math.random() - 0.5) * 3; // Random movement when close
+        bowserX += (Math.random() - 0.5) * bowserSpeed * 2;
       }
       
-      // Bowser damage on collision
       if (!invincible && Math.abs(bowserX - toadWorldX) < 30 && Math.abs(toadY) < 10) {
         takeDamage();
       }
     }
 
-    // Remove off-screen goombas that went too far
+    if (megaBossActive) {
+      const megaBossScreenX = megaBossX - cameraX;
+      megaBoss.style.left = megaBossScreenX + 'px';
+      
+      if (Math.abs(megaBossX - toadWorldX) < 35 && toadY < -5 && toadVY > 0) {
+        megaBossHits++;
+        toadVY = -12;
+        const counter = document.getElementById('boss-hit-counter');
+        if (counter) counter.textContent = megaBossHits;
+        
+        const hitSpeedMultiplier = 1 + (megaBossHits * 0.2);
+        megaBoss.style.animation = `bounce ${Math.max(0.25, 0.4 / hitSpeedMultiplier)}s ease-in-out`;
+        playJumpSound();
+        
+        if (megaBossHits >= 30) {
+          endMegaBossBattle();
+          return;
+        }
+      }
+      
+      const distToMegaBoss = megaBossX - toadWorldX;
+      const megaBossSpeed = 2.5 + (megaBossHits * 0.35);
+      if (distToMegaBoss > 80) {
+        megaBossX -= megaBossSpeed;
+      } else if (distToMegaBoss < -80) {
+        megaBossX += megaBossSpeed;
+      } else {
+        megaBossX += (Math.random() - 0.5) * megaBossSpeed * 2.5;
+      }
+      
+      if (!invincible && Math.abs(megaBossX - toadWorldX) < 35 && Math.abs(toadY) < 10) {
+        takeDamage();
+      }
+    }
+
     goombas = goombas.filter(g => {
       if (g.x < -100 || g.x > worldWidth + 100) {
         g.el.remove();
@@ -612,7 +796,7 @@
       gameState = 'gameover';
       if (spawnTimer) clearInterval(spawnTimer);
       document.getElementById('gameover-screen').classList.remove('hidden');
-      document.getElementById('gameover-msg').textContent = "The Goombas got you!";
+      document.getElementById('gameover-msg').textContent = "The fusion defeated you!";
       return;
     }
 
@@ -633,7 +817,1006 @@
     document.getElementById('coin-count').textContent = coins;
   }
 
-  // Dialogue system
+  function showDialogue(text, choices) {
+    return new Promise(resolve => {
+      const overlay = document.getElementById('dialogue-overlay');
+      const textEl = document.getElementById('dialogue-text');
+      const choicesEl = document.getElementById('dialogue-choices');
+      
+      overlay.classList.remove('hidden');
+      textEl.textContent = text;
+      
+      if (choices && choices.length > 0) {
+        choicesEl.classList.remove('hidden');
+        choicesEl.innerHTML = '';
+        choices.forEach(c => {
+          const btn = document.createElement('button');
+          btn.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 sm:px-6 py-2 rounded-full shadow transition-all transform hover:scale-105 text-sm sm:text-base';
+          btn.textContent = c.text;
+          btn.addEventListener('click', () => { c.action(); resolve(); });
+          choicesEl.appendChild(btn);
+        });
+      } else {
+        choicesEl.classList.add('hidden');
+        resolve();
+      }
+    });
+  }
+
+  function hideDialogue() {
+    document.getElementById('dialogue-overlay').classList.add('hidden');
+    document.getElementById('dialogue-choices').classList.add('hidden');
+  }
+
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function startBossBattle() {
+    if (bossActive) return;
+    
+    bossActive = true;
+    bowserX = toadWorldX + 200;
+    bowserHealth = 20;
+    bowserHits = 0;
+    if (spawnTimer) clearInterval(spawnTimer);
+    
+    playBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.remove('hidden');
+    
+    bowser.classList.remove('hidden');
+    bowser.style.bottom = '33%';
+    bowser.style.animation = 'bounce 0.6s ease-in-out';
+  }
+
+  function endBossBattle() {
+    bossActive = false;
+    gameState = 'win';
+    if (spawnTimer) clearInterval(spawnTimer);
+    
+    stopBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.add('hidden');
+    bowser.classList.add('hidden');
+    goombas.forEach(g => g.el.remove());
+    goombas = [];
+    
+    document.getElementById('win-screen').classList.remove('hidden');
+    createConfetti();
+  }
+
+  async function endMegaBossBattle() {
+    megaBossActive = false;
+    gameState = 'cutscene';
+    if (spawnTimer) clearInterval(spawnTimer);
+    
+    stopBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.add('hidden');
+
+    const fusionFlash = document.createElement('div');
+    fusionFlash.style.cssText = 'position:absolute; inset:0; background:radial-gradient(circle, #ffff00 0%, transparent 70%); z-index:45;';
+    document.getElementById('game-world').appendChild(fusionFlash);
+    
+    for (let i = 0; i < 3; i++) {
+      await delay(300);
+      fusionFlash.style.opacity = i % 2 === 0 ? '1' : '0';
+    }
+    fusionFlash.remove();
+
+    megaBoss.classList.add('hidden');
+    
+    mario.classList.remove('hidden');
+    mario.style.left = '30%';
+    mario.style.bottom = '35%';
+    
+    bowser.classList.remove('hidden');
+    bowser.style.left = '70%';
+    bowser.style.bottom = '35%';
+
+    await delay(800);
+
+    princess.classList.remove('hidden');
+
+    await delay(1000);
+
+    const slap = document.createElement('div');
+    slap.style.cssText = 'position:absolute; left:35%; top:20%; font-size:40px; z-index:40;';
+    slap.textContent = '💥';
+    document.getElementById('game-world').appendChild(slap);
+
+    mario.style.animation = 'none';
+    mario.style.transform = 'scaleX(-1)';
+    
+    await delay(500);
+    slap.remove();
+    
+    await showDialogue("THAT'S FOR FUSING WITH BOWSER!", []);
+    await delay(2000);
+    hideDialogue();
+    
+    await delay(1000);
+
+    bowser.classList.add('walk-anim');
+    let bowserLeft = 70;
+    const bowserEscape = setInterval(() => {
+      bowserLeft += 1;
+      bowser.style.left = bowserLeft + '%';
+      if (bowserLeft > 120) {
+        clearInterval(bowserEscape);
+        bowser.classList.add('hidden');
+        bowser.classList.remove('walk-anim');
+      }
+    }, 30);
+
+    await delay(2500);
+
+    gameState = 'win';
+    document.getElementById('win-screen').classList.remove('hidden');
+    document.getElementById('win-screen').innerHTML = `
+      <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4 text-center" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
+      <p class="text-yellow-900 text-base sm:text-lg mb-4 text-center">You defeated the DNA fusion!</p>
+      <p class="text-yellow-900 text-base sm:text-lg mb-8 text-center">And saved Princess Peach! 👑</p>
+      <button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-lg sm:text-xl px-8 sm:px-10 py-2 sm:py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
+    `;
+    document.getElementById('win-restart-btn').addEventListener('click', resetGame);
+    
+    createConfetti();
+  }
+
+  function createConfetti() {
+    const container = document.getElementById('confetti-container');
+    const colors = ['#fbbf24', '#dc2626', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+    
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + '%';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+      confetti.style.width = (Math.random() * 8 + 4) + 'px';
+      confetti.style.height = (Math.random() * 8 + 4) + 'px';
+      container.appendChild(confetti);
+    }
+  }
+
+  document.addEventListener('keydown', e => { keys[e.code] = true; });
+  document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+  // Mobile button controls
+  const mobileLeft = document.getElementById('mobile-left');
+  const mobileRight = document.getElementById('mobile-right');
+  const mobileJump = document.getElementById('mobile-jump');
+  
+  if (mobileLeft) {
+    mobileLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+    mobileLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+    mobileLeft.addEventListener('mousedown', () => { keys['ArrowLeft'] = true; });
+    mobileLeft.addEventListener('mouseup', () => { keys['ArrowLeft'] = false; });
+  }
+  
+  if (mobileRight) {
+    mobileRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+    mobileRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+    mobileRight.addEventListener('mousedown', () => { keys['ArrowRight'] = true; });
+    mobileRight.addEventListener('mouseup', () => { keys['ArrowRight'] = false; });
+  }
+  
+  if (mobileJump) {
+    mobileJump.addEventListener('touchstart', (e) => { e.preventDefault(); keys['Space'] = true; });
+    mobileJump.addEventListener('touchend', (e) => { e.preventDefault(); keys['Space'] = false; });
+    mobileJump.addEventListener('mousedown', () => { keys['Space'] = true; });
+    mobileJump.addEventListener('mouseup', () => { keys['Space'] = false; });
+  }
+
+  let touchStartX = 0;
+  let touchActive = false;
+  document.addEventListener('touchstart', e => {
+    touchActive = true;
+    touchStartX = e.touches[0].clientX;
+    const screenW = window.innerWidth;
+    if (e.touches[0].clientY < window.innerHeight * 0.5) {
+      keys['Space'] = true;
+      setTimeout(() => { keys['Space'] = false; }, 100);
+    }
+  });
+  document.addEventListener('touchmove', e => {
+    if (!touchActive) return;
+    const x = e.touches[0].clientX;
+    const screenW = window.innerWidth;
+    if (x < screenW * 0.4) { keys['ArrowLeft'] = true; keys['ArrowRight'] = false; }
+    else if (x > screenW * 0.6) { keys['ArrowRight'] = true; keys['ArrowLeft'] = false; }
+    else { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; }
+  });
+  document.addEventListener('touchend', () => {
+    touchActive = false;
+    keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
+  });
+  </script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+    html, body { height: 100%; margin: 0; overflow: hidden; touch-action: none; }
+    * { font-family: 'Fredoka', sans-serif; -webkit-user-select: none; user-select: none; }
+    @media (max-width: 768px) {
+      body { font-size: 14px; }
+    }
+    
+    .game-canvas { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes bounce { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.85) scaleX(1.1)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes netFall { from{top:-100px;opacity:0} to{top:50%;opacity:1} }
+    @keyframes walkCycle { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+    @keyframes confettiFall { 0%{transform:translateY(-10vh) rotateZ(0deg); opacity:1} 100%{transform:translateY(100vh) rotateZ(720deg); opacity:0} }
+    
+    .float-anim { animation: float 2s ease-in-out infinite; }
+    .bounce-anim { animation: bounce 0.4s ease; }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .walk-anim { animation: walkCycle 0.3s ease-in-out infinite; }
+    
+    .speech-bubble {
+      position: relative; background: white; border-radius: 16px; padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 300px;
+    }
+    .speech-bubble::after {
+      content:''; position:absolute; bottom:-10px; left:30px;
+      border-width:10px 10px 0; border-style:solid; border-color:white transparent transparent;
+    }
+    
+    .heart { display:inline-block; width:24px; height:24px; position:relative; }
+    .heart::before,.heart::after {
+      content:''; position:absolute; width:12px; height:20px; background:#e53e3e;
+      border-radius:12px 12px 0 0; top:0;
+    }
+    .heart::before { left:12px; transform:rotate(-45deg); transform-origin:0 100%; }
+    .heart::after { left:0; transform:rotate(45deg); transform-origin:100% 100%; }
+    .heart.empty::before,.heart.empty::after { background:#cbd5e0; }
+    
+    .goomba {
+      position:absolute; width:32px; height:32px; transition: left 0.05s linear, bottom 0.05s linear;
+    }
+    .coin-item {
+      position:absolute; width:16px; height:16px; border-radius:50%; background:#fbbf24;
+      border:2px solid #d97706; animation: float 1.5s ease-in-out infinite;
+    }
+    
+    .toad-char { position:absolute; width:36px; height:48px; transition: none; }
+    
+    .confetti { position: absolute; width: 10px; height: 10px; animation: confettiFall 3s ease-in forwards; }
+    
+    #confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+    
+    /* Mobile controls */
+    #mobile-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 20px;
+      z-index: 25;
+      pointer-events: auto;
+    }
+    
+    .mobile-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 3px solid white;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: background 0.1s;
+    }
+    
+    .mobile-btn:active {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(0.95);
+    }
+    
+    .mobile-btn-center {
+      width: 80px;
+      height: 80px;
+      font-size: 32px;
+    }
+    
+    @media (min-width: 769px) {
+      #mobile-controls { display: none; }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <div id="app" class="game-canvas" style="background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 40%, #4ade80 60%, #22c55e 100%);"><!-- MAIN MENU -->
+   <div id="menu-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #60a5fa 0%, #86efac 100%);">
+    <div class="text-center">
+     <div class="mb-4"><!-- Castle silhouette -->
+      <svg width="120" height="100" viewbox="0 0 120 100" class="mx-auto mb-4"><rect x="20" y="40" width="80" height="60" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="10" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <rect x="90" y="30" width="20" height="70" fill="#f5e6d3" stroke="#8b6f47" stroke-width="2" /> <polygon points="20,30 0,30 10,15 20,15" fill="#e8505b" /> <polygon points="100,30 120,30 110,15 100,15" fill="#e8505b" /> <rect x="45" y="60" width="30" height="40" fill="#8b4513" rx="15" ry="15" /> <polygon points="35,40 60,10 85,40" fill="#e8505b" /> <circle cx="60" cy="25" r="5" fill="#fbbf24" />
+      </svg>
+     </div>
+     <h1 id="title-text" class="text-4xl font-bold text-white mb-2" style="text-shadow: 2px 2px 0 #166534;">Toad's Castle Adventure</h1>
+     <p class="text-green-900 text-lg mb-8">A Super Mario inspired adventure!</p><button id="play-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all border-b-4 border-red-700"> ▶ PLAY </button>
+    </div>
+   </div><!-- GAME WORLD -->
+   <div id="game-world" class="absolute inset-0 hidden"><!-- Background layers -->
+    <div id="bg-layer" class="absolute inset-0" style="background: linear-gradient(180deg, #87CEEB 0%, #b3e0f2 50%, #4ade80 65%, #16a34a 100%);"><!-- Castle background -->
+     <svg id="castle-bg" class="absolute" style="bottom:35%; left:50%; transform:translateX(-50%); opacity:0.7;" width="200" height="120" viewbox="0 0 200 120"><rect x="40" y="40" width="120" height="80" fill="#fce4b8" /> <rect x="20" y="25" width="30" height="95" fill="#fce4b8" /> <rect x="150" y="25" width="30" height="95" fill="#fce4b8" /> <polygon points="20,25 50,25 35,5" fill="#dc2626" /> <polygon points="150,25 180,25 165,5" fill="#dc2626" /> <polygon points="70,40 100,5 130,40" fill="#dc2626" /> <rect x="80" y="65" width="40" height="55" fill="#7c3aed" rx="20" /> <circle cx="100" cy="50" r="8" fill="#fbbf24" />
+     </svg>
+    </div><!-- Ground -->
+    <div id="ground" class="absolute bottom-0 left-0 right-0" style="height:35%; background: linear-gradient(180deg, #4ade80 0%, #16a34a 30%, #15803d 100%);"></div><!-- Stone path -->
+    <div class="absolute bottom-0 left-0 right-0" style="height:8%;">
+     <svg width="100%" height="100%" preserveaspectratio="none"><rect width="100%" height="100%" fill="#9ca3af" opacity="0.4" />
+     </svg>
+    </div><!-- Game entities container -->
+    <div id="entities" class="absolute inset-0"></div><!-- Toad player -->
+    <div id="toad" class="toad-char" style="bottom:35%; left:50%;">
+     <svg width="36" height="48" viewbox="0 0 36 48"><!-- Mushroom cap --> <ellipse cx="18" cy="14" rx="16" ry="14" fill="#ffffff" /> <circle cx="10" cy="10" r="5" fill="#dc2626" /> <circle cx="24" cy="8" r="4" fill="#dc2626" /> <circle cx="18" cy="16" r="3" fill="#dc2626" /> <!-- Face --> <ellipse cx="18" cy="22" rx="10" ry="8" fill="#fce4b8" /> <circle cx="14" cy="20" r="2" fill="#1a1a1a" /> <circle cx="22" cy="20" r="2" fill="#1a1a1a" /> <ellipse cx="18" cy="24" rx="3" ry="2" fill="#fca5a5" /> <!-- Body --> <rect x="12" y="28" width="12" height="12" fill="#3b82f6" rx="2" /> <!-- Vest --> <rect x="14" y="28" width="8" height="10" fill="#eab308" rx="1" /> <!-- Legs --> <rect x="12" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <rect x="19" y="39" width="5" height="8" fill="#fce4b8" rx="2" /> <!-- Shoes --> <ellipse cx="14" cy="47" rx="4" ry="3" fill="#7c3aed" /> <ellipse cx="22" cy="47" rx="4" ry="3" fill="#7c3aed" />
+     </svg>
+    </div><!-- UI Overlay -->
+    <div id="game-ui" class="absolute top-4 left-4 right-4 flex justify-between items-start z-30 hidden">
+     <div id="hearts" class="flex gap-1"></div>
+     <div class="bg-black/40 rounded-full px-4 py-1 flex items-center gap-2"><span class="text-yellow-300 text-lg">🪙</span> <span id="coin-count" class="text-white font-bold text-lg">0</span>
+     </div>
+     <div id="boss-battle-ui" class="bg-black/40 rounded-full px-4 py-1 flex items-center gap-2 hidden"><span class="text-red-300 text-lg">👹</span> <span id="boss-hit-counter" class="text-white font-bold text-lg">0</span>
+     </div>
+    </div><!-- Dialogue overlay -->
+    <div id="dialogue-overlay" class="absolute inset-0 z-40 hidden flex items-end justify-center pb-20">
+     <div class="flex flex-col items-center gap-4">
+      <div id="dialogue-bubble" class="speech-bubble text-center">
+       <p id="dialogue-text" class="text-gray-800 font-semibold text-lg"></p>
+      </div>
+      <div id="dialogue-choices" class="flex gap-3 hidden"></div>
+     </div>
+    </div><!-- Mario NPC -->
+    <div id="mario" class="absolute hidden" style="bottom:35%; left:40%;">
+     <svg width="40" height="56" viewbox="0 0 40 56"><rect x="10" y="0" width="20" height="12" fill="#dc2626" rx="4" /> <ellipse cx="20" cy="18" rx="10" ry="9" fill="#fce4b8" /> <circle cx="16" cy="16" r="2" fill="#1a1a1a" /> <circle cx="24" cy="16" r="2" fill="#1a1a1a" /> <rect x="14" y="22" width="12" height="4" fill="#8b4513" rx="1" /> <rect x="10" y="26" width="20" height="16" fill="#dc2626" rx="2" /> <rect x="12" y="26" width="16" height="8" fill="#3b82f6" /> <rect x="10" y="42" width="8" height="12" fill="#3b82f6" rx="2" /> <rect x="22" y="42" width="8" height="12" fill="#3b82f6" rx="2" /> <ellipse cx="14" cy="54" rx="5" ry="3" fill="#8b4513" /> <ellipse cx="26" cy="54" rx="5" ry="3" fill="#8b4513" />
+     </svg>
+    </div><!-- Bowser -->
+    <div id="bowser" class="absolute hidden" style="bottom:35%; left:50%;">
+     <svg width="60" height="70" viewbox="0 0 60 70"><ellipse cx="30" cy="55" rx="22" ry="15" fill="#16a34a" /> <ellipse cx="30" cy="25" rx="18" ry="16" fill="#fbbf24" /> <circle cx="22" cy="22" r="4" fill="#dc2626" /> <circle cx="38" cy="22" r="4" fill="#dc2626" /> <rect x="20" y="32" width="20" height="6" fill="#fbbf24" /> <rect x="22" y="34" width="3" height="4" fill="white" /> <rect x="27" y="34" width="3" height="4" fill="white" /> <rect x="32" y="34" width="3" height="4" fill="white" /> <polygon points="15,10 18,20 12,20" fill="#f97316" /> <polygon points="25,5 28,18 22,18" fill="#f97316" /> <polygon points="35,5 38,18 32,18" fill="#f97316" /> <polygon points="45,10 48,20 42,20" fill="#f97316" /> <ellipse cx="30" cy="60" rx="18" ry="10" fill="#fbbf24" />
+     </svg>
+    </div><!-- MEGA FUSION BOSS: DNA-COMBINED MARIO & BOWSER -->
+    <div id="mega-boss" class="absolute hidden" style="bottom:33%; left:50%;">
+     <svg width="95" height="105" viewbox="0 0 95 105">
+      <defs>
+       <radialgradient id="megaBossAura">
+        <stop offset="0%" style="stop-color:#ffff00;stop-opacity:0.6" />
+        <stop offset="70%" style="stop-color:#ff6600;stop-opacity:0.3" />
+        <stop offset="100%" style="stop-color:#ff0000;stop-opacity:0" />
+       </radialgradient>
+      </defs> <!-- Aura glow --> <circle cx="47.5" cy="52" r="52" fill="url(#megaBossAura)" opacity="0.7" /> <!-- DNA HELIX STRANDS --> <path d="M 28 12 Q 38 24 33 40 Q 28 55 38 75" stroke="#00ff00" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85" /> <path d="M 67 12 Q 57 24 62 40 Q 67 55 57 75" stroke="#00ff00" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.85" /> <!-- DNA connectors --> <circle cx="30" cy="28" r="3.5" fill="#00ff00" opacity="1" /> <circle cx="65" cy="28" r="3.5" fill="#00ff00" opacity="1" /> <line x1="30" y1="28" x2="65" y2="28" stroke="#00ff00" stroke-width="3" opacity="0.7" /> <circle cx="35" cy="52" r="3.5" fill="#00ff00" opacity="1" /> <circle cx="60" cy="52" r="3.5" fill="#00ff00" opacity="1" /> <line x1="35" y1="52" x2="60" y2="52" stroke="#00ff00" stroke-width="3" opacity="0.7" /> <!-- HEAD: RED CAP + GOLDEN SPIKES --> <rect x="18" y="2" width="59" height="26" fill="#dc2626" rx="10" /> <polygon points="26,2 23,-12 29,2" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="42,0 38,-14 46,0" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="58,2 55,-12 61,2" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="71,0 68,-14 74,0" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <!-- HYBRID FACE --> <ellipse cx="47.5" cy="42" rx="27" ry="22" fill="#fce4b8" stroke="#f97316" stroke-width="3" /> <!-- LEFT EYE: Mario style --> <circle cx="32" cy="36" r="5" fill="white" stroke="#1a1a1a" stroke-width="2" /> <circle cx="32" cy="36" r="2.5" fill="#1a1a1a" /> <!-- RIGHT EYE: Bowser menacing --> <circle cx="63" cy="32" r="7" fill="white" stroke="#1a1a1a" stroke-width="2" /> <circle cx="63" cy="32" r="4" fill="#dc2626" /> <circle cx="65" cy="30" r="2" fill="white" /> <!-- SHARP FANGS --> <polygon points="36,48 32,58 40,52" fill="white" stroke="#333" stroke-width="1" /> <polygon points="59,48 63,58 55,52" fill="white" stroke="#333" stroke-width="1" /> <!-- EVIL GRIN --> <path d="M 38 52 Q 47.5 57 57 52" stroke="#8b4513" stroke-width="3" fill="none" stroke-linecap="round" /> <!-- BODY: RED TORSO WITH BOWSER'S SHELL --> <rect x="16" y="60" width="63" height="32" fill="#dc2626" rx="5" /> <ellipse cx="47.5" cy="70" rx="30" ry="16" fill="#16a34a" opacity="0.88" /> <!-- SHELL SPIKES --> <polygon points="25,60 21,48 29,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="47.5,60 43,46 52,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <polygon points="70,60 74,48 66,60" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <!-- OVERALLS PANEL --> <rect x="22" y="62" width="51" height="20" fill="#3b82f6" opacity="0.95" rx="2" /> <circle cx="32" cy="71" r="3" fill="#fbbf24" /> <circle cx="63" cy="71" r="3" fill="#fbbf24" /> <!-- LEFT CLAWS --> <rect x="12" y="85" width="12" height="18" fill="#16a34a" rx="5" /> <polygon points="12,103 8,103 8,105" fill="#1a1a1a" /> <polygon points="18,103 22,103 22,105" fill="#1a1a1a" /> <polygon points="24,103 28,103 28,105" fill="#1a1a1a" /> <!-- RIGHT CLAWS --> <rect x="71" y="85" width="12" height="18" fill="#16a34a" rx="5" /> <polygon points="71,103 67,103 67,105" fill="#1a1a1a" /> <polygon points="77,103 81,103 81,105" fill="#1a1a1a" /> <polygon points="83,103 87,103 87,105" fill="#1a1a1a" />
+     </svg>
+    </div><!-- Princess Peach -->
+    <div id="princess-peach" class="absolute hidden" style="bottom:35%; left:60%;">
+     <svg width="44" height="60" viewbox="0 0 44 60">
+      <polygon points="8,5 22,0 36,5 32,12 12,12" fill="#fbbf24" stroke="#d97706" stroke-width="1" /> <circle cx="16" cy="8" r="2" fill="#ec4899" /> <circle cx="22" cy="5" r="2" fill="#ec4899" /> <circle cx="28" cy="8" r="2" fill="#ec4899" /> <ellipse cx="22" cy="20" rx="11" ry="10" fill="#fce4b8" /> <circle cx="17" cy="18" r="2.5" fill="#1a1a1a" /> <circle cx="27" cy="18" r="2.5" fill="#1a1a1a" /> <ellipse cx="22" cy="23" rx="2" ry="1.5" fill="#ec4899" /> <path d="M 11 18 Q 8 12 11 8" stroke="#fbbf24" stroke-width="3" fill="none" /> <path d="M 33 18 Q 36 12 33 8" stroke="#fbbf24" stroke-width="3" fill="none" /> <polygon points="15,28 29,28 34,60 10,60" fill="#ec4899" /> <ellipse cx="22" cy="28" rx="15" ry="4" fill="#fbbf24" opacity="0.6" /> <rect x="8" y="30" width="6" height="18" fill="#fce4b8" rx="2" /> <rect x="30" y="30" width="6" height="18" fill="#fce4b8" rx="2" /> <ellipse cx="16" cy="58" rx="5" ry="3" fill="#fbbf24" /> <ellipse cx="28" cy="58" rx="5" ry="3" fill="#fbbf24" />
+     </svg>
+    </div><!-- Fade overlay -->
+    <div id="fade-overlay" class="absolute inset-0 bg-black z-50 hidden" style="opacity:0; transition:opacity 1.5s;"></div><!-- Confetti container -->
+    <div id="confetti-container"></div>
+   </div><!-- GAME OVER -->
+   <div id="gameover-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);">
+    <h2 class="text-5xl font-bold text-red-400 mb-4" style="text-shadow: 2px 2px 0 #7f1d1d;">GAME OVER</h2>
+    <p id="gameover-msg" class="text-gray-300 text-lg mb-8">Better luck next time!</p><button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Try Again </button>
+   </div><!-- WIN SCREEN -->
+   <div id="win-screen" class="absolute inset-0 hidden flex flex-col items-center justify-center z-50" style="background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);">
+    <h2 class="text-5xl font-bold text-white mb-4" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
+    <p class="text-yellow-900 text-lg mb-8">You survived the ultimate fusion!</p><button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
+   </div>
+  </div>
+  <script>
+  // Config & SDK
+  const defaultConfig = {
+    game_title: "Toad's Castle Adventure",
+    background_color: "#87CEEB",
+    surface_color: "#4ade80",
+    text_color: "#ffffff",
+    primary_action_color: "#dc2626",
+    secondary_action_color: "#3b82f6",
+    font_family: "Fredoka",
+    font_size: 16
+  };
+
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const title = config.game_title || defaultConfig.game_title;
+      const el = document.getElementById('title-text');
+      if (el) el.textContent = title;
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+        { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }},
+        { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }}
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }}
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ["game_title", config.game_title || defaultConfig.game_title]
+    ])
+  });
+
+  // Game State
+  let gameState = 'menu';
+  let health = 5;
+  let coins = 0;
+  let toadX = 50;
+  let toadY = 0;
+  let toadVY = 0;
+  let isJumping = false;
+  let facingRight = true;
+  let keys = {};
+  let goombas = [];
+  let coinItems = [];
+  let gameLoop = null;
+  let spawnTimer = null;
+  let invincible = false;
+  let goombasSpawned = 0;
+  let maxGoombas = 55;
+  let cameraX = 0;
+  let worldWidth = 2000;
+  let toadWorldX = 400;
+  let bossActive = false;
+  let bowserHealth = 20;
+  let bowserX = 400;
+  let bowserHits = 0;
+  let goombasDefeated = 0;
+  let megaBossActive = false;
+  let megaBossX = 400;
+  let megaBossHits = 0;
+
+  const toad = document.getElementById('toad');
+  const mario = document.getElementById('mario');
+  const bowser = document.getElementById('bowser');
+  const megaBoss = document.getElementById('mega-boss');
+  const princess = document.getElementById('princess-peach');
+  const entities = document.getElementById('entities');
+
+  // Audio context for sound effects
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playJumpSound() {
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  function playCoinSound() {
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  let bossMusicOscillators = [];
+
+  function playBossMusic() {
+    stopBossMusic();
+    
+    const pattern = [
+      { freq: 130.81, dur: 0.3 },
+      { freq: 164.81, dur: 0.3 },
+      { freq: 196.00, dur: 0.3 },
+      { freq: 246.94, dur: 0.3 },
+      { freq: 196.00, dur: 0.3 },
+      { freq: 164.81, dur: 0.3 },
+    ];
+    
+    function playPattern(startTime = audioContext.currentTime) {
+      if (bossMusicOscillators.length === 0) return;
+      
+      let currentTime = startTime;
+      pattern.forEach(note => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.frequency.value = note.freq;
+        gain.gain.setValueAtTime(0.15, currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + note.dur * 0.9);
+        
+        osc.start(currentTime);
+        osc.stop(currentTime + note.dur);
+        
+        bossMusicOscillators.push(osc);
+        currentTime += note.dur;
+      });
+      
+      setTimeout(() => playPattern(audioContext.currentTime), (pattern.reduce((a, b) => a + b.dur, 0) - 0.05) * 1000);
+    }
+    
+    bossMusicOscillators.push(true);
+    playPattern();
+  }
+
+  function stopBossMusic() {
+    bossMusicOscillators.forEach(osc => {
+      if (osc && osc.stop) {
+        try { osc.stop(); } catch (e) {}
+      }
+    });
+    bossMusicOscillators = [];
+  }
+
+  // Menu
+  document.getElementById('play-btn').addEventListener('click', () => {
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('game-world').classList.remove('hidden');
+    startIntro();
+  });
+
+  document.getElementById('restart-btn').addEventListener('click', resetGame);
+  document.getElementById('win-restart-btn').addEventListener('click', resetGame);
+
+  function resetGame() {
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('win-screen').classList.add('hidden');
+    document.getElementById('game-world').classList.add('hidden');
+    document.getElementById('menu-screen').classList.remove('hidden');
+    document.getElementById('fade-overlay').classList.add('hidden');
+    document.getElementById('fade-overlay').style.opacity = '0';
+    document.getElementById('game-ui').classList.add('hidden');
+    health = 5;
+    coins = 0;
+    toadWorldX = 400;
+    toadY = 0;
+    toadVY = 0;
+    isJumping = false;
+    invincible = false;
+    bossActive = false;
+    megaBossActive = false;
+    bowserHits = 0;
+    megaBossHits = 0;
+    goombasSpawned = 0;
+    goombasDefeated = 0;
+    goombas = [];
+    coinItems = [];
+    entities.innerHTML = '';
+    mario.classList.add('hidden');
+    bowser.classList.add('hidden');
+    megaBoss.classList.add('hidden');
+    princess.classList.add('hidden');
+    document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #87CEEB 0%, #b3e0f2 50%, #4ade80 65%, #16a34a 100%)';
+    document.getElementById('ground').style.background = 'linear-gradient(180deg, #4ade80 0%, #16a34a 30%, #15803d 100%)';
+    toad.style.opacity = '1';
+    toad.style.left = '50%';
+    toad.style.bottom = '35%';
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    if (spawnTimer) clearInterval(spawnTimer);
+    document.getElementById('confetti-container').innerHTML = '';
+    gameState = 'menu';
+  }
+
+  // Intro sequence
+  async function startIntro() {
+    gameState = 'intro';
+    toad.style.left = '55%';
+    toad.style.bottom = '35%';
+    mario.classList.remove('hidden');
+    mario.style.left = '40%';
+    mario.style.bottom = '35%';
+
+    await delay(500);
+    await showDialogue("Oh hi, I did not see you there. I need your help! Bowser kidnapped Princess Peach in his castle. Can you help me?", [
+      { text: "Yes", action: introYes },
+      { text: "No", action: introNo }
+    ]);
+  }
+
+  async function introNo() {
+    hideDialogue();
+    await delay(300);
+    await showDialogue("You should've said yes… let me combine my power with Bowser!", []);
+    await delay(2000);
+    hideDialogue();
+
+    const fade = document.getElementById('fade-overlay');
+    fade.classList.remove('hidden');
+    fade.style.opacity = '1';
+    await delay(1500);
+
+    document.getElementById('bg-layer').style.background = 'linear-gradient(180deg, #1a1a2e 0%, #2d1b4e 50%, #4a2c2a 100%)';
+    document.getElementById('ground').style.background = '#2d1b1b';
+    
+    bowser.classList.remove('hidden');
+    bowser.style.left = '55%';
+    bowser.style.bottom = '38%';
+
+    mario.classList.remove('hidden');
+    mario.style.left = '35%';
+    mario.style.bottom = '35%';
+
+    fade.style.opacity = '0';
+    await delay(1500);
+
+    await showDialogue("Bowser! Merge with me! We'll crush this toad together!", []);
+    await delay(2500);
+    hideDialogue();
+    await delay(500);
+
+    const fusionFlash = document.createElement('div');
+    fusionFlash.style.cssText = 'position:absolute; inset:0; background:radial-gradient(circle, #ffff00 0%, #ff6600 50%, transparent 70%); z-index:45;';
+    document.getElementById('game-world').appendChild(fusionFlash);
+    
+    for (let i = 0; i < 4; i++) {
+      await delay(250);
+      fusionFlash.style.opacity = i % 2 === 0 ? '1' : '0';
+    }
+    fusionFlash.remove();
+
+    mario.classList.add('hidden');
+    bowser.classList.add('hidden');
+
+    megaBoss.classList.remove('hidden');
+    megaBoss.style.left = '50%';
+    megaBoss.style.bottom = '33%';
+
+    await delay(800);
+    await showDialogue("BEHOLD THE ULTIMATE FUSION! MARIO + BOWSER DNA COMBINED! ⚡🧬", []);
+    await delay(3000);
+    hideDialogue();
+
+    health = 5;
+    megaBossActive = true;
+    megaBossX = 400;
+    megaBossHits = 0;
+    gameState = 'playing';
+    document.getElementById('game-ui').classList.remove('hidden');
+    updateHearts();
+    updateCoins();
+    
+    fade.style.opacity = '1';
+    await delay(800);
+    fade.classList.add('hidden');
+    fade.style.opacity = '0';
+    
+    playBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.remove('hidden');
+    
+    megaBoss.style.animation = 'bounce 0.4s ease-in-out';
+    
+    await showDialogue("Jump on the fusion 30 times to split them apart!", []);
+    await delay(2500);
+    hideDialogue();
+    
+    gameLoop = requestAnimationFrame(update);
+  }
+
+  async function introYes() {
+    hideDialogue();
+    await delay(300);
+    
+    mario.classList.add('float-anim');
+    await showDialogue("Okay! I'm going to the shop now, good luck!", []);
+    await delay(2000);
+    hideDialogue();
+
+    let marioBottom = 35;
+    const floatAway = setInterval(() => {
+      marioBottom += 1;
+      mario.style.bottom = marioBottom + '%';
+      mario.style.opacity = Math.max(0, 1 - (marioBottom - 35) / 40);
+      if (marioBottom > 75) {
+        clearInterval(floatAway);
+        mario.classList.add('hidden');
+        mario.style.opacity = '1';
+        mario.classList.remove('float-anim');
+        startGameplay();
+      }
+    }, 40);
+  }
+
+  function startGameplay() {
+    gameState = 'playing';
+    document.getElementById('game-ui').classList.remove('hidden');
+    updateHearts();
+    updateCoins();
+    spawnInitialCoins();
+    
+    spawnTimer = setInterval(() => {
+      if (goombasSpawned < maxGoombas && goombas.length < 15) {
+        spawnGoomba();
+        goombasSpawned++;
+      }
+    }, 2000);
+
+    gameLoop = requestAnimationFrame(update);
+  }
+
+  function spawnGoomba() {
+    const side = Math.random() > 0.5 ? toadWorldX + 500 + Math.random() * 200 : toadWorldX - 500 - Math.random() * 200;
+    const g = {
+      x: Math.max(0, Math.min(worldWidth, side)),
+      speed: 0.8 + Math.random() * 1.2,
+      dir: Math.random() > 0.5 ? 1 : -1,
+      el: null,
+      chasing: false
+    };
+    const el = document.createElement('div');
+    el.className = 'goomba';
+    el.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32">
+      <ellipse cx="16" cy="20" rx="14" ry="12" fill="#8b4513"/>
+      <ellipse cx="16" cy="14" rx="10" ry="10" fill="#d4a574"/>
+      <circle cx="11" cy="12" r="3" fill="white"/><circle cx="11" cy="13" r="2" fill="#1a1a1a"/>
+      <circle cx="21" cy="12" r="3" fill="white"/><circle cx="21" cy="13" r="2" fill="#1a1a1a"/>
+      <rect x="8" y="18" width="16" height="3" fill="#fbbf24"/>
+      <rect x="12" y="19" width="2" height="2" fill="white"/>
+      <rect x="16" y="19" width="2" height="2" fill="white"/>
+      <rect x="7" y="26" width="7" height="6" fill="#1a1a1a" rx="2"/>
+      <rect x="18" y="26" width="7" height="6" fill="#1a1a1a" rx="2"/>
+    </svg>`;
+    entities.appendChild(el);
+    g.el = el;
+    goombas.push(g);
+  }
+
+  function spawnInitialCoins() {
+    for (let i = 0; i < 20; i++) {
+      const c = {
+        x: 100 + Math.random() * (worldWidth - 200),
+        y: 10 + Math.random() * 60,
+        collected: false,
+        el: null
+      };
+      const el = document.createElement('div');
+      el.className = 'coin-item';
+      entities.appendChild(el);
+      c.el = el;
+      coinItems.push(c);
+    }
+  }
+
+  function update() {
+    if (gameState !== 'playing') return;
+
+    const speed = 4;
+    if (keys['ArrowLeft'] || keys['KeyA']) { toadWorldX -= speed; facingRight = false; }
+    if (keys['ArrowRight'] || keys['KeyD']) { toadWorldX += speed; facingRight = true; }
+    if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && !isJumping) {
+      isJumping = true; toadVY = -12;
+    }
+
+    if (isJumping) {
+      toadY += toadVY;
+      toadVY += 0.6;
+      if (toadY >= 0) { toadY = 0; isJumping = false; toadVY = 0; }
+    }
+
+    toadWorldX = Math.max(20, Math.min(worldWidth - 20, toadWorldX));
+
+    const containerW = document.getElementById('game-world').offsetWidth;
+    cameraX = toadWorldX - containerW / 2;
+    cameraX = Math.max(0, Math.min(worldWidth - containerW, cameraX));
+
+    const screenX = toadWorldX - cameraX;
+    toad.style.left = screenX + 'px';
+    toad.style.bottom = (35 + (-toadY * 0.3)) + '%';
+    toad.style.transform = facingRight ? 'scaleX(1)' : 'scaleX(-1)';
+    if ((keys['ArrowLeft'] || keys['KeyA'] || keys['ArrowRight'] || keys['KeyD']) && !isJumping) {
+      toad.classList.add('walk-anim');
+    } else {
+      toad.classList.remove('walk-anim');
+    }
+
+    goombas = goombas.filter(g => {
+      const dist = Math.abs(g.x - toadWorldX);
+      
+      if (dist < 25 && toadY < -5 && toadVY > 0) {
+        g.el.remove();
+        toadVY = -8;
+        coins += 10;
+        updateCoins();
+        playJumpSound();
+        
+        goombasDefeated++;
+        
+        if (!bossActive && goombasDefeated >= 8) {
+          startBossBattle();
+        }
+        
+        return false;
+      }
+      
+      if (!invincible && dist < 25 && Math.abs(toadY) < 10) {
+        takeDamage();
+      }
+      
+      if (dist < 200) {
+        g.chasing = true;
+        g.dir = g.x < toadWorldX ? 1 : -1;
+      } else {
+        g.chasing = false;
+      }
+      g.x += g.speed * g.dir * (g.chasing ? 1.5 : 1);
+      if (g.x < 0 || g.x > worldWidth) g.dir *= -1;
+
+      const gScreenX = g.x - cameraX;
+      g.el.style.left = gScreenX + 'px';
+      g.el.style.bottom = '33%';
+      g.el.style.transform = g.dir > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+      g.el.style.display = (gScreenX > -50 && gScreenX < containerW + 50) ? 'block' : 'none';
+      
+      return true;
+    });
+
+    coinItems.forEach(c => {
+      if (c.collected) return;
+      const cScreenX = c.x - cameraX;
+      c.el.style.left = cScreenX + 'px';
+      c.el.style.bottom = (35 + c.y * 0.1) + '%';
+      c.el.style.display = (cScreenX > -20 && cScreenX < containerW + 20) ? 'block' : 'none';
+
+      if (Math.abs(c.x - toadWorldX) < 20 && Math.abs(toadY) < 30) {
+        c.collected = true;
+        c.el.style.display = 'none';
+        coins++;
+        updateCoins();
+        playCoinSound();
+      }
+    });
+
+    if (goombasSpawned >= maxGoombas && goombas.length === 0) {
+      gameState = 'win';
+      document.getElementById('win-screen').classList.remove('hidden');
+      if (spawnTimer) clearInterval(spawnTimer);
+      return;
+    }
+
+    if (bossActive) {
+      const bossScreenX = bowserX - cameraX;
+      bowser.style.left = bossScreenX + 'px';
+      
+      if (Math.abs(bowserX - toadWorldX) < 30 && toadY < -5 && toadVY > 0) {
+        bowserHits++;
+        toadVY = -10;
+        const counter = document.getElementById('boss-hit-counter');
+        if (counter) counter.textContent = bowserHits;
+        
+        const hitSpeedMultiplier = 1 + (bowserHits * 0.15);
+        bowser.style.animation = `bounce ${Math.max(0.3, 0.6 / hitSpeedMultiplier)}s ease-in-out`;
+        
+        if (bowserHits >= 20) {
+          endBossBattle();
+          return;
+        }
+      }
+      
+      const distToBowser = bowserX - toadWorldX;
+      const bowserSpeed = 2 + (bowserHits * 0.3);
+      if (distToBowser > 100) {
+        bowserX -= bowserSpeed;
+      } else if (distToBowser < -100) {
+        bowserX += bowserSpeed;
+      } else {
+        bowserX += (Math.random() - 0.5) * bowserSpeed * 2;
+      }
+      
+      if (!invincible && Math.abs(bowserX - toadWorldX) < 30 && Math.abs(toadY) < 10) {
+        takeDamage();
+      }
+    }
+
+    if (megaBossActive) {
+      const megaBossScreenX = megaBossX - cameraX;
+      megaBoss.style.left = megaBossScreenX + 'px';
+      
+      if (Math.abs(megaBossX - toadWorldX) < 35 && toadY < -5 && toadVY > 0) {
+        megaBossHits++;
+        toadVY = -12;
+        const counter = document.getElementById('boss-hit-counter');
+        if (counter) counter.textContent = megaBossHits;
+        
+        const hitSpeedMultiplier = 1 + (megaBossHits * 0.2);
+        megaBoss.style.animation = `bounce ${Math.max(0.25, 0.4 / hitSpeedMultiplier)}s ease-in-out`;
+        playJumpSound();
+        
+        if (megaBossHits >= 30) {
+          endMegaBossBattle();
+          return;
+        }
+      }
+      
+      const distToMegaBoss = megaBossX - toadWorldX;
+      const megaBossSpeed = 2.5 + (megaBossHits * 0.35);
+      if (distToMegaBoss > 80) {
+        megaBossX -= megaBossSpeed;
+      } else if (distToMegaBoss < -80) {
+        megaBossX += megaBossSpeed;
+      } else {
+        megaBossX += (Math.random() - 0.5) * megaBossSpeed * 2.5;
+      }
+      
+      if (!invincible && Math.abs(megaBossX - toadWorldX) < 35 && Math.abs(toadY) < 10) {
+        takeDamage();
+      }
+    }
+
+    goombas = goombas.filter(g => {
+      if (g.x < -100 || g.x > worldWidth + 100) {
+        g.el.remove();
+        return false;
+      }
+      return true;
+    });
+
+    gameLoop = requestAnimationFrame(update);
+  }
+
+  function takeDamage() {
+    health--;
+    invincible = true;
+    toad.style.opacity = '0.5';
+    updateHearts();
+    
+    if (health <= 0) {
+      gameState = 'gameover';
+      if (spawnTimer) clearInterval(spawnTimer);
+      document.getElementById('gameover-screen').classList.remove('hidden');
+      document.getElementById('gameover-msg').textContent = "The fusion defeated you!";
+      return;
+    }
+
+    setTimeout(() => { invincible = false; toad.style.opacity = '1'; }, 1500);
+  }
+
+  function updateHearts() {
+    const container = document.getElementById('hearts');
+    container.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const h = document.createElement('span');
+      h.className = 'heart' + (i >= health ? ' empty' : '');
+      container.appendChild(h);
+    }
+  }
+
+  function updateCoins() {
+    document.getElementById('coin-count').textContent = coins;
+  }
+
   function showDialogue(text, choices) {
     return new Promise(resolve => {
       const overlay = document.getElementById('dialogue-overlay');
@@ -667,9 +1850,8 @@
 
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Boss battle functions
   function startBossBattle() {
-    if (bossActive) return; // Prevent multiple triggers
+    if (bossActive) return;
     
     bossActive = true;
     bowserX = toadWorldX + 200;
@@ -677,11 +1859,11 @@
     bowserHits = 0;
     if (spawnTimer) clearInterval(spawnTimer);
     
-    // Show boss battle UI
+    playBossMusic();
+    
     const bossBattleUI = document.getElementById('boss-battle-ui');
     if (bossBattleUI) bossBattleUI.classList.remove('hidden');
     
-    // Show Bowser
     bowser.classList.remove('hidden');
     bowser.style.bottom = '33%';
     bowser.style.animation = 'bounce 0.6s ease-in-out';
@@ -692,15 +1874,95 @@
     gameState = 'win';
     if (spawnTimer) clearInterval(spawnTimer);
     
-    // Hide boss battle UI and Bowser
+    stopBossMusic();
+    
     const bossBattleUI = document.getElementById('boss-battle-ui');
     if (bossBattleUI) bossBattleUI.classList.add('hidden');
     bowser.classList.add('hidden');
     goombas.forEach(g => g.el.remove());
     goombas = [];
     
-    // Show win screen with confetti
     document.getElementById('win-screen').classList.remove('hidden');
+    createConfetti();
+  }
+
+  async function endMegaBossBattle() {
+    megaBossActive = false;
+    gameState = 'cutscene';
+    if (spawnTimer) clearInterval(spawnTimer);
+    
+    stopBossMusic();
+    
+    const bossBattleUI = document.getElementById('boss-battle-ui');
+    if (bossBattleUI) bossBattleUI.classList.add('hidden');
+
+    const fusionFlash = document.createElement('div');
+    fusionFlash.style.cssText = 'position:absolute; inset:0; background:radial-gradient(circle, #ffff00 0%, transparent 70%); z-index:45;';
+    document.getElementById('game-world').appendChild(fusionFlash);
+    
+    for (let i = 0; i < 3; i++) {
+      await delay(300);
+      fusionFlash.style.opacity = i % 2 === 0 ? '1' : '0';
+    }
+    fusionFlash.remove();
+
+    megaBoss.classList.add('hidden');
+    
+    mario.classList.remove('hidden');
+    mario.style.left = '30%';
+    mario.style.bottom = '35%';
+    
+    bowser.classList.remove('hidden');
+    bowser.style.left = '70%';
+    bowser.style.bottom = '35%';
+
+    await delay(800);
+
+    princess.classList.remove('hidden');
+
+    await delay(1000);
+
+    const slap = document.createElement('div');
+    slap.style.cssText = 'position:absolute; left:35%; top:20%; font-size:40px; z-index:40;';
+    slap.textContent = '💥';
+    document.getElementById('game-world').appendChild(slap);
+
+    mario.style.animation = 'none';
+    mario.style.transform = 'scaleX(-1)';
+    
+    await delay(500);
+    slap.remove();
+    
+    await showDialogue("THAT'S FOR FUSING WITH BOWSER!", []);
+    await delay(2000);
+    hideDialogue();
+    
+    await delay(1000);
+
+    bowser.classList.add('walk-anim');
+    let bowserLeft = 70;
+    const bowserEscape = setInterval(() => {
+      bowserLeft += 1;
+      bowser.style.left = bowserLeft + '%';
+      if (bowserLeft > 120) {
+        clearInterval(bowserEscape);
+        bowser.classList.add('hidden');
+        bowser.classList.remove('walk-anim');
+      }
+    }, 30);
+
+    await delay(2500);
+
+    gameState = 'win';
+    document.getElementById('win-screen').classList.remove('hidden');
+    document.getElementById('win-screen').innerHTML = `
+      <h2 class="text-5xl font-bold text-white mb-4" style="text-shadow: 2px 2px 0 #92400e;">YOU WIN! 🎉</h2>
+      <p class="text-yellow-900 text-lg mb-4">You defeated the DNA fusion!</p>
+      <p class="text-yellow-900 text-lg mb-8">And saved Princess Peach! 👑</p>
+      <button id="win-restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl px-10 py-3 rounded-full shadow-lg border-b-4 border-green-700 transform hover:scale-105 transition-all"> ↺ Play Again </button>
+    `;
+    document.getElementById('win-restart-btn').addEventListener('click', resetGame);
+    
     createConfetti();
   }
 
@@ -720,11 +1982,35 @@
     }
   }
 
-  // Controls
   document.addEventListener('keydown', e => { keys[e.code] = true; });
   document.addEventListener('keyup', e => { keys[e.code] = false; });
 
-  // Touch controls
+  // Mobile button controls
+  const mobileLeft = document.getElementById('mobile-left');
+  const mobileRight = document.getElementById('mobile-right');
+  const mobileJump = document.getElementById('mobile-jump');
+  
+  if (mobileLeft) {
+    mobileLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+    mobileLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+    mobileLeft.addEventListener('mousedown', () => { keys['ArrowLeft'] = true; });
+    mobileLeft.addEventListener('mouseup', () => { keys['ArrowLeft'] = false; });
+  }
+  
+  if (mobileRight) {
+    mobileRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+    mobileRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+    mobileRight.addEventListener('mousedown', () => { keys['ArrowRight'] = true; });
+    mobileRight.addEventListener('mouseup', () => { keys['ArrowRight'] = false; });
+  }
+  
+  if (mobileJump) {
+    mobileJump.addEventListener('touchstart', (e) => { e.preventDefault(); keys['Space'] = true; });
+    mobileJump.addEventListener('touchend', (e) => { e.preventDefault(); keys['Space'] = false; });
+    mobileJump.addEventListener('mousedown', () => { keys['Space'] = true; });
+    mobileJump.addEventListener('mouseup', () => { keys['Space'] = false; });
+  }
+
   let touchStartX = 0;
   let touchActive = false;
   document.addEventListener('touchstart', e => {
@@ -748,6 +2034,6 @@
     touchActive = false;
     keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
   });
-</script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f49f72df6b5c3ab',t:'MTc3NzU4Nzk2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4a2b11d0a90f79',t:'MTc3NzU5MDA4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
