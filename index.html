@@ -199,6 +199,44 @@
   const bowser = document.getElementById('bowser');
   const entities = document.getElementById('entities');
 
+  // Audio context for sound effects
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playJumpSound() {
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  function playCoinSound() {
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    // Ka-ching: two tones - low then high
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
   // Menu
   document.getElementById('play-btn').addEventListener('click', () => {
     document.getElementById('menu-screen').classList.add('hidden');
@@ -457,6 +495,7 @@
         toadVY = -8; // Bounce up
         coins += 10;
         updateCoins();
+        playJumpSound(); // Play sound when defeating goomba
         
         goombasDefeated++; // Track defeated goombas
         
@@ -504,6 +543,7 @@
         c.el.style.display = 'none';
         coins++;
         updateCoins();
+        playCoinSound();
       }
     });
 
@@ -709,5 +749,5 @@
     keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
   });
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f49ebbdb7ddc3ab',t:'MTc3NzU4NzQ5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f49f72df6b5c3ab',t:'MTc3NzU4Nzk2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
